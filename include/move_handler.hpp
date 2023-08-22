@@ -19,7 +19,8 @@ private:
     Board& game_board;
     State_Manager& state_manager;
 
-    std::map<Position, std::vector<std::shared_ptr<Piece>>> obstructionManager;
+    std::map<Position, std::vector<std::shared_ptr<Piece>>> obstruction_manager;
 
-    void reset_parents_at(const Position pos);
+    std::vector<std::shared_ptr<Piece>> check_for_obstructions(std::shared_ptr<Piece> piece);
+    // void reset_parents_at(const Position pos);
 };
