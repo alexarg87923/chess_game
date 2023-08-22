@@ -5,32 +5,20 @@
 
 King::King(){}
 King::~King(){}
-King::King(Position pos, char team_color) : King(pos.first, pos.second, team_color) {}
-King::King(char row, int col, char team_color) : Piece(row, col, team_color) {
-    piece->setTexture(load_sprite(name, team_color));
-    calc_valid_moves();
-    save_piece_to_map(team, name, this);
-}
+King::King(const Position& pos, Color team_color, sf::Vector2f size) : King(pos.row, pos.col, team_color, size) {}
+King::King(char row, int col, Color team_color, sf::Vector2f size) : Piece(row, col, team_color, "king", size) {}
 
-
-void King::calc_valid_moves() {
-    valid_moves.clear();
-
-    valid_moves = get_moves(piece_position);
-
-    Piece::calc_valid_moves();
-}
-
-std::vector<Position> King::get_moves(Position pos, bool get_every_move) {
+std::vector<Position> King::get_moves(const Position& pos) const {
     const int RANGE_START = -1;
     const int RANGE_END = 2;
     const int ZERO_OFFSET = 0;
 
     std::vector<Position> moves;
-
+    Position pos_copy = pos;
+    
     for (int i = RANGE_START; i < RANGE_END; i++) {
         for (int j = RANGE_START; j < RANGE_END; j++) {
-            Position new_pos = std::make_pair(pos.first + i, pos.second + j);
+            Position new_pos = {static_cast<char>(pos_copy.row + i), pos_copy.col + j};
             if (!(i == ZERO_OFFSET && j == ZERO_OFFSET)) {
                 if (validate_move(new_pos))
                     moves.push_back(new_pos);
@@ -41,7 +29,7 @@ std::vector<Position> King::get_moves(Position pos, bool get_every_move) {
 }
 
 
-bool King::validate_move(char row, int col) {
+bool King::validate_move(char row, int col) const {
     bool valid_move = Piece::validate_move(row, col);
     bool safe_square = true;
 
@@ -52,7 +40,7 @@ bool King::validate_move(char row, int col) {
     return valid_move && safe_square;
 }
 
-void King::update_position(Position pos) {
+void King::update_position(const Position& pos) {
     if (!already_moved) {
         already_moved = true;
     }
@@ -60,15 +48,15 @@ void King::update_position(Position pos) {
     Piece::update_position(pos);
 }
 
-bool King::is_in_check() {
-    return (Game::get_hitbox_states()->check_hitbox((team == 'w') ? 'b' : 'w', piece_position).empty() ? false : true);
-}
+// bool King::is_in_check() const {
+//     // return (Game::get_hitbox_states()->check_hitbox((team == 'w') ? 'b' : 'w', piece_position).empty() ? false : true);
+// }
 
 
 /*
     OVERLOADED FUNCTIONS
 */
 
-bool King::validate_move(Position pos) {
-    return validate_move(pos.first, pos.second);
+bool King::validate_move(const Position& pos) const {
+    return validate_move(pos.row, pos.col);
 }

@@ -1,36 +1,22 @@
 #include "pieces/knight.hpp"
 
-#include "board.hpp"
-
 Knight::Knight(){}
 Knight::~Knight(){}
-Knight::Knight(Position pos, char team_color) : Knight(pos.first, pos.second, team_color) {}
-Knight::Knight(char row, int col, char team_color) : Piece(row, col, team_color) {
-    piece->setTexture(load_sprite(name, team_color));
-    calc_valid_moves();
-    save_piece_to_map(team, name, this);
-}
+Knight::Knight(const Position& pos, Color team_color, sf::Vector2f size) : Knight(pos.row, pos.col, team_color, size) {}
+Knight::Knight(char row, int col, Color team_color, sf::Vector2f size) : Piece(row, col, team_color, "knight", size) {}
 
-void Knight::calc_valid_moves() {
-    valid_moves.clear();
-
-    valid_moves = get_moves(piece_position);
-
-    Piece::calc_valid_moves();
-}
-
-std::vector<Position> Knight::get_moves(Position pos, bool get_every_move) {
+std::vector<Position> Knight::get_moves(const Position& pos) const {
     std::pair<int, int> offsets[] = {{1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}};
 
     std::vector<Position> moves;
 
     for (const auto& offset : offsets) {
-        int newX = piece_position.first + offset.first;
-        int newY = piece_position.second + offset.second;
+        int newX = piece_position.row + offset.first;
+        int newY = piece_position.col + offset.second;
 
         if (!validate_move(newX, newY)) continue;
 
-        moves.emplace_back(newX, newY);
+        moves.emplace_back(Position{static_cast<char>(newX), newY});
     }
     return moves;
 }

@@ -23,21 +23,26 @@ public:
     ~Game();
     void start();
 
-    static State_Manager *get_hitbox_states();
-
 private:
-    sf::RenderWindow window;
-    std::unique_ptr<Board> game_board;
     sf::Event event;
-    
-    static State_Manager *board_hitbox_state;
+    sf::Clock clock;
 
-    void listen_left_click(sf::Event& event);
+    sf::RenderWindow* window;
+    Board* game_board;
+    State_Manager* board_hitbox_state;
 
-    void handle_drawing();
-    void check_close(sf::Event& event);
-    void check_select();
-    bool check_move();
+    const float FRAME_RATE = 1.0f / 30.0f;
+
+    void handle_events();
+    void handle_frame_rate(const float& frameRate, sf::Clock& clock);
+
+    void initialize_pieces() const;
+    void listen_left_click(const sf::Event& event) const;
+    void handle_drawing() const;
+
+    void check_close(const sf::Event& event) const;
+    void check_select() const;
+    bool check_move() const;
 };
 
 #endif

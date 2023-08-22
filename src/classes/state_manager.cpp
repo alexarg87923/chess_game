@@ -3,10 +3,10 @@
 #include "piece.hpp"
 #include "hitbox.hpp"
 
-State_Manager::State_Manager(){}
+State_Manager::State_Manager(Board* board){}
 State_Manager::~State_Manager(){}
 
-std::vector<Hitbox*> State_Manager::check_hitbox(char team, char row, int col) {
+std::vector<Hitbox*> State_Manager::check_hitbox(Color team, char row, int col) const {
     auto team_board = HITBOX_STATES.find(team);
 
     if (team_board == HITBOX_STATES.end()) {
@@ -14,7 +14,7 @@ std::vector<Hitbox*> State_Manager::check_hitbox(char team, char row, int col) {
     }
 
     auto &board = team_board->second;
-    auto hitbox = board.find(std::make_pair(row, col));
+    auto hitbox = board.find({row, col});
 
     if (hitbox != board.end()) {
         return hitbox->second;
@@ -31,8 +31,8 @@ void State_Manager::clear_hitbox_state() {
     }
 }
 
-void State_Manager::update_hitbox_state(char team, char row, int col, Hitbox* value) {
-    HITBOX_STATES[team][std::make_pair(row, col)].push_back(value);
+void State_Manager::update_hitbox_state(Color team, char row, int col, Hitbox* value) {
+    HITBOX_STATES[team][{row, col}].push_back(value);
 }
 
 void State_Manager::refresh_hitbox_state(Piece* piece_hitbox_to_update) {
@@ -55,13 +55,13 @@ void State_Manager::refresh_hitbox_state(Piece* piece_hitbox_to_update) {
 
 void State_Manager::add_moves_to_state(Piece* piece) {
     for (auto &each : piece->get_valid_moves()) {
-        Hitbox *tmp = new Hitbox(Board::get_size_of_grid_square(), each, Board::pair_to_pos(each), (Board::check_piece(each) ? sf::Color(0, 0, 255, 128) : sf::Color(0, 0, 255)), piece);
+        Hitbox *tmp = new Hitbox(game_board->get_size_of_grid_square(), each, game_board->get_grid_square_from_map(each)->getPosition(), (game_board->get_piece(each) ? sf::Color(0, 0, 255, 128) : sf::Color(0, 0, 255)), piece);
         piece->add_hitbox(tmp);
         update_hitbox_state(piece->get_team(), each, tmp);
     }
 }
 
-std::vector<Hitbox*> State_Manager::check_hitbox(Position pos) {
+std::vector<Hitbox*> State_Manager::check_hitbox(const Position& pos) const {
     std::vector<Hitbox*> mergedResults;
 
     if (HITBOX_STATES.empty()) {
@@ -87,10 +87,10 @@ std::vector<Hitbox*> State_Manager::check_hitbox(Position pos) {
     OVERLOADED FUNCTIONS
 */
 
-std::vector<Hitbox*> State_Manager::check_hitbox(char team, Position key) {
-    return check_hitbox(team, key.first, key.second);
+std::vector<Hitbox*> State_Manager::check_hitbox(Color team, const Position& key) const {
+    return check_hitbox(team, key.row, key.col);
 }
 
-void State_Manager::update_hitbox_state(char team, Position pos, Hitbox* value) {
+void State_Manager::update_hitbox_state(Color team, const Position& pos, Hitbox* value) {
     HITBOX_STATES[team][pos].push_back(value);
 }

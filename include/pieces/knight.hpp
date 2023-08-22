@@ -6,21 +6,15 @@
 
 #include "piece.hpp"
 
-class Board;
-
 class Knight : public Piece {
 public:
     Knight();
     ~Knight();
 
-    Knight(char row, int col, char team_color);
-    Knight(Position pos, char team_color);
+    Knight(char row, int col, Color team_color, sf::Vector2f size);
+    Knight(const Position &pos, Color team_color, sf::Vector2f size);
 
-    std::vector<Position> get_moves(Position pos, bool get_every_move = false) override;
-
-    void calc_valid_moves() override;
-private:
-    std::string name = "knight"; 
+    std::vector<Position> get_moves(const Position& pos) const override;
 };
 
 #endif

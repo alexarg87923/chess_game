@@ -6,23 +6,19 @@
 
 #include "piece.hpp"
 
-class Board;
-
 class Pawn : public Piece {
 public:
     Pawn();
     ~Pawn();
-    Pawn(char row, int col, char team_color);
-    Pawn(Position pos, char team_color);
+    Pawn(char row, int col, Color team_color, sf::Vector2f size);
+    Pawn(const Position& pos, Color team_color, sf::Vector2f size);
 
-    std::vector<Position> get_moves(Position pos, bool get_every_move = false) override;
+    std::vector<Position> get_moves(const Position& pos) const override;
 
-    void update_position(Position pos) override;
+    void update_position(const Position& pos) override;
 
-    void calc_valid_moves() override;
 private:
     bool first_move = true;
-    std::string name = "pawn"; 
 };
 
 #endif

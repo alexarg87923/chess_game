@@ -6,22 +6,15 @@
 
 #include "piece.hpp"
 
-class Board;
-
 class Rook : virtual public Piece {
 public:
     Rook();
     ~Rook();
 
-    Rook(char row, int col, char team_color);
-    Rook(Position pos, char team_color);
-    void calc_valid_moves() override;
-
+    Rook(char row, int col, Color team_color, sf::Vector2f size);
+    Rook(const Position& pos, Color team_color, sf::Vector2f size);
 protected:
-    std::vector<Position> get_moves(Position pos, bool get_every_move = false) override;
-
-private:
-    std::string name = "rook"; 
+    virtual std::vector<Position> get_moves(const Position& pos) const override;
 };
 
 #endif

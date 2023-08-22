@@ -2,33 +2,24 @@
 
 #include "piece.hpp"
 
-sf::Vector2f Board::GRID_SQUARE_SIZE = sf::Vector2f(0, 0);
-std::map<Position, sf::RectangleShape> Board::MAP_OF_GRID;
-std::map<Position, Piece*> Board::PIECES;
-sf::Vector2f Board::MAP_OF_POSITIONS[BOARD_ROW][BOARD_COL];
-
-// bool Board::CHECK_PIECE_FAST[BOARD_ROW][BOARD_COL];
-std::map<char, std::map<std::string, Piece*>> Board::MAP_OF_PIECES;
-
 Board::~Board() {}
 Board::Board() {}
 
-Board::Board(sf::Vector2u window_size) {
-    sf::RectangleShape board_asset;
+Board::Board(sf::Vector2u window_size) : king_white(nullptr), king_black(nullptr), selected_piece(nullptr) {
+    sf::RectangleShape* board_asset = new sf::RectangleShape;
     sf::Vector2f shape_size = sf::Vector2f(1000, 1000);
     sf::Vector2f half_of_shape = sf::Vector2f(shape_size.x/2, shape_size.y/2);
 
-    board_asset.setSize(shape_size);
-    board_asset.setFillColor(sf::Color::White);
-    board_asset.setPosition((window_size.x/2) - half_of_shape.x, (window_size.y/2) - half_of_shape.y);
+    board_asset->setSize(shape_size);
+    board_asset->setFillColor(sf::Color::White);
+    board_asset->setPosition((window_size.x/2) - half_of_shape.x, (window_size.y/2) - half_of_shape.y);
 
     set_board(board_asset);
-    add_grid();
 }
 
 void Board::add_grid() {
-    sf::Vector2f size = board.getSize();
-    sf::Vector2 board_pos = board.getPosition();
+    sf::Vector2f size = board->getSize();
+    sf::Vector2 board_pos = board->getPosition();
     
     size = sf::Vector2f(size.x/BOARD_COL, size.y/BOARD_ROW);
 
@@ -45,24 +36,33 @@ void Board::add_grid() {
 
             // The SFML coordinate system is turned into the standard chess coordinate system
             char character_offset = ('A' + row);
-            std::pair<char, int> key = std::make_pair(character_offset, (BOARD_COL - col));
+            Position key = {character_offset, (BOARD_COL - col)};
 
-            // The coordinate is saved to be used as a constant essentially, 
-            // And the grid piece is also saved using that new coordinate system
-            MAP_OF_POSITIONS[row][col] = new_position;
             set_map_of_grid_square(key, *grid_piece);
         }
     }
 }
 
 void Board::draw_grid(sf::RenderWindow &window) {
-    for (auto pair : get_map_of_grid_square()) {
-        window.draw(pair.second);
+    for (auto pair : *MAP_OF_GRID) {
+        window.draw(*pair.second);
+    }
+}
+
+Piece* Board::get_king(Color team) {
+    return (team == WHITE) ? king_white : king_black;
+}
+
+void Board::set_king(Piece* incoming_king) {
+    if(incoming_king->get_team() == WHITE) {
+        king_white = incoming_king;
+    } else {
+        king_black = incoming_king;
     }
 }
 
 std::optional<Piece*> Board::check_clicked_piece(sf::Vector2i mouse_pos) {
-    for (auto pair : get_map_of_piece()) {
+    for (auto pair : *PIECES) {
         if(pair.second->get_piece()->getGlobalBounds().contains(mouse_pos.x, mouse_pos.y)) {
             return pair.second;
         }
@@ -78,12 +78,12 @@ Piece* Board::get_selected_piece() {
     return selected_piece;
 }
 
-sf::RectangleShape Board::get_board() {
+sf::RectangleShape* Board::get_board() {
     return board;
 }
 
-void Board::set_board(sf::RectangleShape tmp) {
-    board = tmp;
+void Board::set_board(sf::RectangleShape* incoming_board) {
+    board = incoming_board;
 }
 
 void Board::set_size_of_grid_square(sf::Vector2f tmp) {
@@ -94,25 +94,17 @@ sf::Vector2f Board::get_size_of_grid_square() {
     return GRID_SQUARE_SIZE;
 }
 
-sf::Vector2f Board::pair_to_pos(char row, int col) {
-    return MAP_OF_POSITIONS[row - 'A'][BOARD_COL - col];
-}
-
-sf::RectangleShape Board::get_grid_square_from_map(char row, int col) {
-    return MAP_OF_GRID[std::make_pair(row, col)];
-}
-
-std::map<Position, sf::RectangleShape> Board::get_map_of_grid_square() {
-    return MAP_OF_GRID;
+sf::RectangleShape* Board::get_grid_square_from_map(char row, int col) {
+    return (*MAP_OF_GRID)[Position{row, col}];
 }
 
 void Board::set_map_of_grid_square(Position key, sf::RectangleShape val) {
-    MAP_OF_GRID[key] = val;
+
 }
 
 std::optional<Piece*> Board::get_piece(char row, int col) {
-    auto iter = PIECES.find(std::make_pair(row, col));
-    if (iter != PIECES.end()) {
+    auto iter = PIECES->find({row, col});
+    if (iter != PIECES->end()) {
         return iter->second;
     } else {
         return std::nullopt;
@@ -120,49 +112,35 @@ std::optional<Piece*> Board::get_piece(char row, int col) {
 }
 
 bool Board::check_piece(char row, int col) {
-    auto it = PIECES.find(std::make_pair(row, col));
-    return (it != PIECES.end()) ? true : false;
+    auto it = PIECES->find({row, col});
+    return (it != PIECES->end()) ? true : false;
 }
 
-// void Board::update_check_piece(char row, int col, bool value) {
-//     CHECK_PIECE_FAST[row - 'A'][BOARD_COL - col] = value;
-// }
-
 std::optional<Piece*> Board::get_piece(Position key) {
-    auto iter = PIECES.find(key);
-    if (iter != PIECES.end()) {
+    auto iter = PIECES->find(key);
+    if (iter != PIECES->end()) {
         return iter->second;
     } else {
         return std::nullopt;
     }
 }
 
-std::map<Position, Piece*> Board::get_map_of_piece() {
-    return PIECES;
-}
-
 void Board::set_piece(Position key, Piece *val) {
     if (val == nullptr) {
-        PIECES.erase(key);
+        PIECES->erase(key);
+    } else if (key == Position{}) {
+        (*PIECES)[val->get_pos()] = val;
     } else {
-        PIECES[key] = val;
+        (*PIECES)[key] = val;
     }
 }
 
 void Board::draw_piece(sf::RenderWindow &window) {
-    for (auto pair : PIECES) {
+    for (auto pair : (*PIECES)) {
         if (pair.second) {
             pair.second->draw(window);
         }
     }
-}
-
-void Board::save_map_of_pieces(char team, std::string name, Piece* piece) {
-    MAP_OF_PIECES[team][name] = piece;
-}
-
-Piece* Board::get_piece_from_map(char team, std::string name) {
-    return MAP_OF_PIECES[team][name];
 }
 
 std::optional<Position> Board::check_clicked_hitbox(sf::Vector2i mouse_pos) {
@@ -187,7 +165,7 @@ void Board::make_hitboxes() {
     HITBOXES = selected_piece->get_hitboxes();
 }
 
-void Board::draw_hitboxes(sf::RenderWindow &window) {
+void Board::draw_hitboxes(sf::RenderWindow &window) const {
     if (!selected_piece) {
         return;
     }
@@ -203,23 +181,20 @@ void Board::draw_hitboxes(sf::RenderWindow &window) {
     OVERLOADED FUNCTIONS
 */
 
-// void Board::update_check_piece(Position key, bool value) {
-//     update_check_piece(key.first, key.second, value);
-// }
 
-void Board::set_piece(char row, int col, Piece* val) {
-    set_piece(std::make_pair(row, col), val);
+void Board::set_piece(char row, int col, Piece* piece_to_save) {
+    set_piece({row, col}, piece_to_save);
 }
 
-sf::Vector2f Board::pair_to_pos(Position key) {
-    return pair_to_pos(key.first, key.second);
+void Board::set_piece(Piece* piece_to_save) {
+    set_piece({}, piece_to_save);
 }
 
-sf::RectangleShape Board::get_grid_square_from_map(Position key) {
-    return get_grid_square_from_map(key.first, key.second);
+sf::RectangleShape* Board::get_grid_square_from_map(Position key) {
+    return get_grid_square_from_map(key.row, key.col);
 }
 
 bool Board::check_piece(Position key) {
-    return check_piece(key.first, key.second);
+    return check_piece(key.row, key.col);
 }
 

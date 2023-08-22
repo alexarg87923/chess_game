@@ -12,14 +12,10 @@ public:
     Queen();
     ~Queen();
 
-    Queen(char row, int col, char team_color);
-    Queen(Position pos, char team_color);
+    Queen(char row, int col, Color team_color, sf::Vector2f size);
+    Queen(const Position& pos, Color team_color, sf::Vector2f size);
 
-    std::vector<Position> get_moves(Position pos, bool get_every_move = false) override;
-
-    void calc_valid_moves() override;
-private:
-    std::string name = "queen"; 
+    std::vector<Position> get_moves(const Position& pos) const override;
 };
 
 #endif

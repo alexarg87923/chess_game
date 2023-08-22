@@ -11,7 +11,7 @@ class Chess_AI {
 public:
     Chess_AI();
     ~Chess_AI();
-    bool will_this_move_stop_check(State_Manager *board, Position pos);
+    bool will_this_move_stop_check(const State_Manager *board, const Position& pos) const;
 };
 
 #endif

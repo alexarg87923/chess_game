@@ -3,7 +3,7 @@
 Chess_AI::Chess_AI(){}
 Chess_AI::~Chess_AI(){}
 
-bool Chess_AI::will_this_move_stop_check(State_Manager* board, Position pos) {
+bool Chess_AI::will_this_move_stop_check(const State_Manager* board, const Position& pos) const {
 
     return false;
 }

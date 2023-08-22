@@ -11,19 +11,22 @@ class Hitbox;
 
 class State_Manager {
 public:
-    State_Manager();
+    State_Manager(Board* board);
     ~State_Manager();
 
-    std::vector<Hitbox*> check_hitbox(char team, Position key);
-    std::vector<Hitbox*> check_hitbox(char team, char row, int col);
+    std::vector<Hitbox*> check_hitbox(Color team, const Position& key) const;
+    std::vector<Hitbox*> check_hitbox(Color team, char row, int col) const;
+
     void clear_hitbox_state();
-    void update_hitbox_state(char team, Position pos, Hitbox *value);
-    void update_hitbox_state(char team, char row, int col, Hitbox *value);
+    void update_hitbox_state(Color team, const Position& pos, Hitbox *value);
+    void update_hitbox_state(Color team, char row, int col, Hitbox *value);
     void refresh_hitbox_state(Piece* piece_hitbox_to_update);
     void add_moves_to_state(Piece* piece);
-    std::vector<Hitbox*> check_hitbox(Position pos);
+    std::vector<Hitbox*> check_hitbox(const Position& pos) const;
+
 private:
     std::map<char, std::map<Position, std::vector<Hitbox*>>> HITBOX_STATES;
+    Board* game_board;
 };
 
 #endif

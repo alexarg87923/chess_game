@@ -13,15 +13,11 @@ public:
     Bishop();
     ~Bishop();
 
-    Bishop(char row, int col, char team_color);
-    Bishop(Position pos, char team_color);
+    Bishop(char row, int col, Color team_color, sf::Vector2f size);
+    Bishop(const Position& pos, Color team_color, sf::Vector2f size);
 
-    void calc_valid_moves() override;
 protected:
-    std::vector<Position> get_moves(Position pos, bool get_every_move = false) override;
-    
-private:
-    std::string name = "bishop";
+    virtual std::vector<Position> get_moves(const Position& pos) const override;
 };
 
 #endif

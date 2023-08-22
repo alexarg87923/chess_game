@@ -6,29 +6,25 @@
 
 #include "piece.hpp"
 
-class Board;
-class Game;
-
 class King : public Piece {
 public:
     King();
     ~King();
 
-    King(char row, int col, char team_color);
-    King(Position pos, char team_color);
+    King(char row, int col, Color team_color, sf::Vector2f size);
+    King(const Position& pos, Color team_color, sf::Vector2f size);
 
-    bool is_in_check();
+    // bool is_in_check() const;
 
-    void calc_valid_moves() override;
-    bool validate_move(char row, int col) override;
-    bool validate_move(Position pos) override;
+    bool validate_move(char row, int col) const override;
+    bool validate_move(const Position &pos) const override;
 
-    std::vector<Position> get_moves(Position pos, bool get_every_move = false) override;
+    std::vector<Position> get_moves(const Position& pos) const override;
 
-    void update_position(Position pos) override;
+    void update_position(const Position& pos) override;
+
 private:
     bool already_moved = false;
-    std::string name = "king"; 
 };
 
 #endif
