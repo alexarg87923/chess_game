@@ -3,10 +3,11 @@
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
-#include <piece.hpp>
 
+#include "piece.hpp"
 #include "board.hpp"
 
+class Window;
 
 class King : public Piece {
 public:
@@ -22,7 +23,7 @@ public:
     bool validate_move(char row, int col) override;
     bool validate_move(Position pos) override;
 
-    std::vector<Position> get_moves(Position pos, bool get_every_move) override;
+    std::vector<Position> get_moves(Position pos, bool get_every_move = false) override;
 
     void update_position(Position pos) override;
 private:

@@ -3,7 +3,7 @@
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
-#include <piece.hpp>
+#include "piece.hpp"
 
 #include "board.hpp"
 
@@ -18,7 +18,7 @@ public:
     void calc_valid_moves() override;
 
 protected:
-    std::vector<Position> get_moves(Position pos, bool get_every_move) override;
+    std::vector<Position> get_moves(Position pos, bool get_every_move = false) override;
 
 private:
     std::string name = "rook"; 

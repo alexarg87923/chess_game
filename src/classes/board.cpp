@@ -1,12 +1,11 @@
 #include "board.hpp"
+#include "piece.hpp"
 
 sf::Vector2f Board::GRID_SQUARE_SIZE = sf::Vector2f(0, 0);
 std::map<Position, sf::RectangleShape> Board::MAP_OF_GRID;
 std::map<Position, Piece*> Board::PIECES;
 sf::Vector2f Board::MAP_OF_POSITIONS[BOARD_ROW][BOARD_COL];
 bool Board::CHECK_PIECE_FAST[BOARD_ROW][BOARD_COL];
-std::unordered_map<char, bool[BOARD_ROW][BOARD_COL]> Board::CHECK_HITBOX_FAST;
-// TeamToPieceMap Board::PIECE_TO_HITBOX_MAPPING;
 std::map<char, std::map<std::string, Piece*>> Board::MAP_OF_PIECES;
 
 Board::~Board() {}
@@ -169,21 +168,8 @@ bool Board::check_piece(char row, int col) {
     return CHECK_PIECE_FAST[row - 'A'][BOARD_COL - col];
 }
 
-bool Board::check_hitbox(char team, char row, int col) {
-    return CHECK_HITBOX_FAST[team][row - 'A'][BOARD_COL - col];
-}
-
-
-void Board::update_check_piece(char row, int col, bool value = false) {
+void Board::update_check_piece(char row, int col, bool value) {
     CHECK_PIECE_FAST[row - 'A'][BOARD_COL - col] = value;
-}
-
-void Board::clear_check_hitbox() {
-    for (auto &pair : CHECK_HITBOX_FAST) {
-        for(auto &row : CHECK_HITBOX_FAST[pair.first]) {
-            std::fill(std::begin(row), std::end(row), false);
-        }
-    }
 }
 
 std::optional<Piece*> Board::get_piece(Position key) {
@@ -199,7 +185,7 @@ std::map<Position, Piece*> Board::get_map_of_piece() {
     return PIECES;
 }
 
-void Board::set_piece(Position key, Piece *val = nullptr) {
+void Board::set_piece(Position key, Piece *val) {
     if (val == nullptr) {
         PIECES.erase(key);
     } else {
@@ -219,24 +205,6 @@ void Board::draw_piece(sf::RenderWindow &window) {
     }
 }
 
-void Board::update_check_hitbox(char team, char row, int col, bool value = false) {
-    CHECK_HITBOX_FAST[team][row - 'A'][BOARD_COL - col] = true;
-}
-
-void Board::refresh_check_hitbox() {
-    Board::clear_check_hitbox();
-    char team;
-
-    for (const auto &pair: PIECES)
-    {
-        team = pair.second->get_team();
-        for (const auto &move: pair.second->get_moves(pair.first, true))
-        {
-            CHECK_HITBOX_FAST[team][move.first - 'A'][BOARD_COL - move.second] = true;
-        }
-    }
-}
-
 void Board::save_map_of_pieces(char team, std::string name, Piece* piece) {
     MAP_OF_PIECES[team][name] = piece;
 }
@@ -251,11 +219,11 @@ Piece* Board::get_piece_from_map(char team, std::string name) {
     OVERLOADED FUNCTIONS
 */
 
-void Board::update_check_piece(Position key, bool value = false) {
+void Board::update_check_piece(Position key, bool value) {
     update_check_piece(key.first, key.second, value);
 }
 
-void Board::set_piece(char row, int col, Piece* val = nullptr) {
+void Board::set_piece(char row, int col, Piece* val) {
     set_piece(std::make_pair(row, col), val);
 }
 
@@ -271,6 +239,3 @@ bool Board::check_piece(Position key) {
     return check_piece(key.first, key.second);
 }
 
-bool Board::check_hitbox(char team, Position key) {
-    return check_hitbox(team, key.first, key.second);
-}

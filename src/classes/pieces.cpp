@@ -1,6 +1,7 @@
 #include "piece.hpp"
 #include "board.hpp"
 #include "pieces/king.hpp"
+#include "window.hpp"
 
 Piece::Piece(char row, int col, char team_color) : Piece(std::make_pair(row, col), team_color) {}
 Piece::Piece(Position pos, char team_color) {
@@ -26,7 +27,7 @@ void Piece::save_piece(sf::RectangleShape *tmp) {
 }
 
 Position Piece::get_pos() {
-    return position;
+    return piece_position;
 }
 
 sf::RectangleShape *Piece::get_ppiece() {
@@ -36,18 +37,18 @@ sf::RectangleShape *Piece::get_ppiece() {
 void Piece::update_position(Position pos) {
     set_position(pos);
 
-    // Watch for this
-    Board::refresh_check_hitbox();
+    // IF ISSUES WITH HITBOXES, UNCOMMENT
+     Window::get_board_hitboxes().refresh_check_hitbox();
 }
 
 void Piece::set_position(Position &pos) {
-    Board::update_check_piece(position, false);
-    Board::set_piece(position, nullptr);
+    Board::update_check_piece(piece_position);
+    Board::set_piece(piece_position);
 
-    position = pos;
-    Board::set_piece(position, this);
-    Board::update_check_piece(position, true);
-    piece->setPosition(Board::pair_to_pos(position));
+    piece_position = pos;
+    Board::set_piece(piece_position, this);
+    Board::update_check_piece(piece_position, true);
+    piece->setPosition(Board::pair_to_pos(piece_position));
 }
 
 bool Piece::validate_move(char row, int col) {
@@ -92,13 +93,14 @@ char Piece::get_team() {
     return team;
 }
 
-// bool Piece::is_this_move_going_to_stop_check(Position pos) {
-//     if(!is_king_in_check())
-//         return;
+bool Piece::is_this_move_going_to_stop_check(Position move) {
+    if(!is_king_in_check())
+        return false;
 
-    
-    
-// }
+    Chess_AI game_simulation;
+
+    return game_simulation.will_this_move_stop_check(Window::get_board_hitboxes(), move);
+}
 
 /*
     OVERLOADED FUNCTIONS

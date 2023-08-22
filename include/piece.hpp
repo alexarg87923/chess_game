@@ -3,13 +3,17 @@
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
-#include <vector>
-#include "string.h"
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/String.hpp>
-#include "unistd.h"
-#include "types.hpp"
 
+#include <vector>
+#include <string.h>
+#include <unistd.h>
+
+#include "types.hpp"
+#include "chess_ai.hpp"
+
+class Window;
 class Board;
 class King;
 
@@ -33,7 +37,7 @@ protected:
     sf::RectangleShape* piece;
     std::vector<Position> valid_moves;
     char team;
-    Position position;
+    Position piece_position;
     std::string name;
 
     virtual void save_piece(sf::RectangleShape *tmp);
@@ -43,9 +47,10 @@ protected:
     sf::Texture* load_sprite(const std::string& name, char team_color);
 
     bool is_king_in_check();
+
     void save_piece_to_map(char team, std::string name, Piece* piece);
 
-    // bool is_this_move_going_to_stop_check(Position pos);
+    bool is_this_move_going_to_stop_check(Position pos);
 private:
     void set_position(Position &pos);
     std::string get_working_dir();

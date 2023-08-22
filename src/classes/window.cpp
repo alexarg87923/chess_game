@@ -1,16 +1,20 @@
 #include "window.hpp"
 
-Window::Window() : window(sf::VideoMode(2560, 1606), "Chesst Game") {}
+#include "piece.hpp"
+
+Array_Manager Window::board_hitboxes;
+
+Window::Window() : window(sf::VideoMode(2560, 1606), "Chesst Game"), game_board(std::make_unique<Board>(window.getSize())) {}
 Window::~Window() {}
 
 void Window::start() {
-    game_board = std::make_unique<Board>(window.getSize());
-
     std::cout << "Starting game...\n";
-
+    
     Pawn testPawn = Pawn('A', 1, 'w');
 
     Pawn enemyPawn = Pawn('B', 8, 'b');
+    Pawn enemyPawn2 = Pawn('C', 8, 'b');
+
     Queen testQueen = Queen('E', 4, 'b');
     Bishop enemyBishop = Bishop('B', 5, 'b');
 
@@ -19,14 +23,7 @@ void Window::start() {
     Knight testKnight = Knight('G', 1, 'w');
     King testKing = King('E', 1, 'w');
 
-    /* 
-      Since order of pieces matters when initializing, then I refresh after I create them all
-      This is because if I spawn a king, then spawn an enemy queen which would cover some of the king's squares
-      The king will not refresh his moves
-      I could make it so there's a refresh after every piece is initialized but refreshing is costly to do every frame even though nothing has happened
-      So I only do it when a piece is actualled moved
-    */
-    game_board->refresh_check_hitbox();
+    board_hitboxes.refresh_check_hitbox();
     game_board->refresh_valid_moves();
 
     // GAME LOOP
@@ -86,10 +83,8 @@ bool Window::check_move() {
             game_board->select_piece(nullptr);
             game_board->clear_hitboxes();
 
-            game_board->refresh_check_hitbox();
+            board_hitboxes.refresh_check_hitbox();
             game_board->refresh_valid_moves();
-
-
             return 1;
         }
     }
@@ -110,4 +105,8 @@ void Window::handle_drawing() {
     game_board->draw_hitboxes(window);
 
     window.display();
+}
+
+Array_Manager Window::get_board_hitboxes() {
+    return board_hitboxes;
 }

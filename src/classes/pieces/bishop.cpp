@@ -15,10 +15,10 @@ void Bishop::calc_valid_moves() {
 
     if (name != "king" && is_king_in_check()) return;
 
-    valid_moves = get_moves(position, false);
+    valid_moves = get_moves(piece_position);
 }
 
-std::vector<Position> Bishop::get_moves(Position pos, bool get_every_move = false) {
+std::vector<Position> Bishop::get_moves(Position pos, bool get_every_move) {
     char row_begin = pos.first, row_end = 7 + 'A';
     int col_begin = pos.second, col_end = BOARD_COL;
 

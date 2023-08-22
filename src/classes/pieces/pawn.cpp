@@ -16,7 +16,7 @@ void Pawn::calc_valid_moves() {
 
     if (name != "king" && is_king_in_check()) return;
 
-    valid_moves = get_moves(position, false);
+    valid_moves = get_moves(piece_position);
 }
 
 std::vector<Position> Pawn::get_moves(Position pos, bool get_every_move) {
