@@ -18,4 +18,8 @@ public:
 private:
     Board& game_board;
     State_Manager& state_manager;
+
+    std::map<Position, std::vector<std::shared_ptr<Piece>>> obstructionManager;
+
+    void reset_parents_at(const Position pos);
 };

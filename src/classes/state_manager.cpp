@@ -45,8 +45,10 @@ void State_Manager::remove_hitboxes_from_state(std::shared_ptr<Piece> piece_hitb
 
         if (mapIt != teamHitboxes.end()) {
             auto& vec = mapIt->second;
-            auto vecIt = std::remove(vec.begin(), vec.end(), *each);
-            vec.erase(vecIt, vec.end());
+            auto vecIt = std::find(vec.begin(), vec.end(), *each);
+            if (vecIt != vec.end()) {
+                vec.erase(vecIt);
+            }
         }
     }
 }

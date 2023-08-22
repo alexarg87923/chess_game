@@ -16,7 +16,7 @@ public:
     bool validate_move(char row, int col) const override;
     bool validate_move(const Position &pos) const override;
 
-    std::vector<Position> get_moves(const Position& pos) const override;
+    std::vector<Position> get_moves(const Position& pos, bool get_every_move = false) const override;
 
 private:
     bool already_moved = false;

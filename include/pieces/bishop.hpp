@@ -12,7 +12,7 @@ public:
     Bishop(const Position& pos, Color team_color, sf::Vector2f size, Move_Handler& handler);
 
 protected:
-    virtual std::vector<Position> get_moves(const Position& pos) const override;
+    virtual std::vector<Position> get_moves(const Position& pos, bool get_every_move = false) const override;
 };
 
 #endif

@@ -5,7 +5,7 @@ Knight::Knight(char row, int col, Color team_color, sf::Vector2f size, Move_Hand
     valid_moves = get_moves(piece_position);
 }
 
-std::vector<Position> Knight::get_moves(const Position& pos) const {
+std::vector<Position> Knight::get_moves(const Position& pos, bool get_every_move) const {
     std::pair<int, int> offsets[] = {{1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}};
 
     std::vector<Position> moves;

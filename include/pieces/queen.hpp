@@ -12,7 +12,7 @@ public:
     Queen(char row, int col, Color team_color, sf::Vector2f size, Move_Handler& handler);
     Queen(const Position& pos, Color team_color, sf::Vector2f size, Move_Handler& handler);
 
-    std::vector<Position> get_moves(const Position& pos) const override;
+    std::vector<Position> get_moves(const Position& pos, bool get_every_move = false) const override;
 };
 
 #endif

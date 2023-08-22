@@ -5,7 +5,7 @@ Rook::Rook(char row, int col, Color team_color, sf::Vector2f size, Move_Handler&
     valid_moves = get_moves(piece_position);
 }
 
-std::vector<Position> Rook::get_moves(const Position& pos) const {
+std::vector<Position> Rook::get_moves(const Position& pos, bool get_every_move) const {
     char row_begin = pos.row, row_end = 7 + 'A';
     int col_begin = pos.col, col_end = BOARD_COL;
 
@@ -15,14 +15,14 @@ std::vector<Position> Rook::get_moves(const Position& pos) const {
     row_begin--;
     for (char i = row_begin; i >= 'A'; i--) {
         moves.push_back({i, pos.col});
-        if (move_handler.is_there_obstruction(Position{i, pos.col}))
+        if (move_handler.is_there_obstruction(Position{i, pos.col}) && !get_every_move)
             break;
     }
     // UP
     col_begin++;
     for (int i = col_begin; i <= col_end; i++) {
         moves.push_back({pos.row, i});
-        if (move_handler.is_there_obstruction(Position{pos.row, i}))
+        if (move_handler.is_there_obstruction(Position{pos.row, i}) && !get_every_move)
             break;
     }
 
@@ -33,7 +33,7 @@ std::vector<Position> Rook::get_moves(const Position& pos) const {
     row_begin++;
     for (char i = row_begin; i <= row_end; i++) {
         moves.push_back({i, pos.col});
-        if (move_handler.is_there_obstruction(Position{i, pos.col}))
+        if (move_handler.is_there_obstruction(Position{i, pos.col}) && !get_every_move)
             break;
     }
     
@@ -41,7 +41,7 @@ std::vector<Position> Rook::get_moves(const Position& pos) const {
     col_begin--;
     for (int i = col_begin; i >= 1; i--) {
         moves.push_back({pos.row, i});
-        if (move_handler.is_there_obstruction(Position{pos.row, i}))
+        if (move_handler.is_there_obstruction(Position{pos.row, i}) && !get_every_move)
             break;
     }
 

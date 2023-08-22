@@ -5,7 +5,7 @@ Pawn::Pawn(char row, int col, Color team_color, sf::Vector2f size, Move_Handler&
     valid_moves = get_moves(piece_position);
 }
 
-std::vector<Position> Pawn::get_moves(const Position& pos) const {
+std::vector<Position> Pawn::get_moves(const Position& pos, bool get_every_move) const {
     std::vector<Position> moves;
     Position pos_copy = pos;
 

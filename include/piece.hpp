@@ -32,7 +32,7 @@ public:
     void add_hitbox(std::shared_ptr<Hitbox> hitbox);
     void add_valid_move(Position pos);
 
-    virtual std::vector<Position> get_moves(const Position& pos) const = 0;
+    virtual std::vector<Position> get_moves(const Position& pos, bool get_every_move = false) const = 0;
 
     bool operator==(const Piece& other) const;
 

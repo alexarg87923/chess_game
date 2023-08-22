@@ -5,7 +5,7 @@ King::King(char row, int col, Color team_color, sf::Vector2f size, Move_Handler&
     valid_moves = get_moves(piece_position);
 }
 
-std::vector<Position> King::get_moves(const Position& pos) const {
+std::vector<Position> King::get_moves(const Position& pos, bool get_every_move) const {
     const int RANGE_START = -1;
     const int RANGE_END = 2;
     const int ZERO_OFFSET = 0;
