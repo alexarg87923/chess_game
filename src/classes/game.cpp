@@ -2,13 +2,16 @@
 
 #include "piece.hpp"
 
-State_Manager Game::board_hitbox_state;
+State_Manager *Game::board_hitbox_state = new State_Manager();
 
 Game::Game() : window(sf::VideoMode(2560, 1606), "Chesst Game"), game_board(std::make_unique<Board>(window.getSize())) {}
 Game::~Game() {}
 
 void Game::start() {
     std::cout << "Starting game...\n";
+
+    sf::Clock clock;
+    const float frameTime = 1.0f / 30.0f;
     
     Pawn testPawn = Pawn('A', 1, 'w');
 
@@ -27,6 +30,13 @@ void Game::start() {
     while (window.isOpen()) {
 
         while (window.pollEvent(event)) {
+
+            sf::Time elapsed = clock.restart();
+            if (elapsed.asSeconds() < frameTime)
+            {
+                sf::sleep(sf::seconds(frameTime - elapsed.asSeconds())); 
+            }
+
             // Checks to see if window is closed
             check_close(event);
 
@@ -79,7 +89,9 @@ bool Game::check_move() {
         if (result.has_value()) {
             selected_piece->update_position(result.value());
 
-            board_hitbox_state.refresh_hitbox_state(selected_piece);
+            selected_piece->calc_valid_moves();
+            board_hitbox_state->refresh_hitbox_state(selected_piece);
+
 
             game_board->select_piece(nullptr);
             game_board->clear_hitboxes();
@@ -109,6 +121,6 @@ void Game::handle_drawing() {
     window.display();
 }
 
-State_Manager Game::get_hitbox_states() {
+State_Manager* Game::get_hitbox_states() {
     return board_hitbox_state;
 }

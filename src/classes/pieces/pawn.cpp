@@ -16,10 +16,8 @@ Pawn::Pawn(char row, int col, char team_color) : Piece(row, col, team_color) {
 void Pawn::calc_valid_moves() {
     valid_moves.clear();
 
-    if (name != "king" && is_king_in_check()) return;
-
     valid_moves = get_moves(piece_position);
-    
+
     Piece::calc_valid_moves();
 }
 
@@ -28,27 +26,31 @@ std::vector<Position> Pawn::get_moves(Position pos, bool get_every_move) {
 
     int direction = (team == 'w') ? 1 : -1;
 
-    std::pair<int, int> offsets[] = {{0, direction}, {1, direction}, {-1, direction}};
-    
+    std::pair<int, int> offsets[4] = {
+        {0, direction},
+        {1, direction},
+        {-1, direction},
+        {0, 0} // placeholder
+    };
+
     if (first_move) {
         offsets[0] = {0, 2 * direction};
+        offsets[3] = {0, 1 * direction};
     }
 
     for (const auto& offset : offsets) {
         int newX = pos.first + offset.first;
         int newY = pos.second + offset.second;
-        
-        // add conditions to push the moves only if the move is valid
-        // assuming that Board::check_piece(newX, newY) checks if a position is valid or not
-        if (offset.first == 0) { 
-            // pawn can move forward (directly in front) if no piece is there
-            if (!Board::check_piece(newX, newY)) {
-                moves.emplace_back(newX, newY);
-            }
-        } else {
-            // pawn can move diagonally forward only if there is a piece to capture
-            if (Board::check_piece(newX, newY)) {
-                moves.emplace_back(newX, newY);
+
+        if (validate_move(newX, newY)) {
+            if (offset.first == 0) { 
+                if (!Board::check_piece(newX, newY)) {
+                    moves.emplace_back(newX, newY);
+                }
+            } else {
+                if (Board::check_piece(newX, newY)) {
+                    moves.emplace_back(newX, newY);
+                }
             }
         }
     }
@@ -60,5 +62,6 @@ void Pawn::update_position(Position pos) {
     if (first_move) {
         first_move = false;
     }
+    
     Piece::update_position(pos);
 }

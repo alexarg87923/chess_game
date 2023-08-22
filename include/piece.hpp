@@ -29,6 +29,7 @@ public:
     char get_team();
     std::vector<Hitbox*> get_hitboxes();
     void clear_hitboxes();
+    void add_hitbox(Hitbox *hitbox);
 
     virtual void update_position(Position pos);
     virtual void calc_valid_moves();
@@ -56,6 +57,7 @@ protected:
 private:
     void set_position(Position &pos);
     std::string get_working_dir();
+    void refresh_affected_pieces(Position pos);
 
 };
 

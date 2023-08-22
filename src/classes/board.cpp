@@ -7,7 +7,7 @@ std::map<Position, sf::RectangleShape> Board::MAP_OF_GRID;
 std::map<Position, Piece*> Board::PIECES;
 sf::Vector2f Board::MAP_OF_POSITIONS[BOARD_ROW][BOARD_COL];
 
-bool Board::CHECK_PIECE_FAST[BOARD_ROW][BOARD_COL];
+// bool Board::CHECK_PIECE_FAST[BOARD_ROW][BOARD_COL];
 std::map<char, std::map<std::string, Piece*>> Board::MAP_OF_PIECES;
 
 Board::~Board() {}
@@ -120,20 +120,21 @@ std::optional<Piece*> Board::get_piece(char row, int col) {
 }
 
 bool Board::check_piece(char row, int col) {
-    return CHECK_PIECE_FAST[row - 'A'][BOARD_COL - col];
+    auto it = PIECES.find(std::make_pair(row, col));
+    return (it != PIECES.end()) ? true : false;
 }
 
-void Board::update_check_piece(char row, int col, bool value) {
-    CHECK_PIECE_FAST[row - 'A'][BOARD_COL - col] = value;
-}
+// void Board::update_check_piece(char row, int col, bool value) {
+//     CHECK_PIECE_FAST[row - 'A'][BOARD_COL - col] = value;
+// }
 
 std::optional<Piece*> Board::get_piece(Position key) {
-    for (auto each : PIECES) {
-        if (each.first == key) {
-            return each.second;
-        }
+    auto iter = PIECES.find(key);
+    if (iter != PIECES.end()) {
+        return iter->second;
+    } else {
+        return std::nullopt;
     }
-    return std::nullopt;
 }
 
 std::map<Position, Piece*> Board::get_map_of_piece() {
@@ -150,7 +151,9 @@ void Board::set_piece(Position key, Piece *val) {
 
 void Board::draw_piece(sf::RenderWindow &window) {
     for (auto pair : PIECES) {
-        pair.second->draw(window);
+        if (pair.second) {
+            pair.second->draw(window);
+        }
     }
 }
 
@@ -204,9 +207,9 @@ void Board::draw_hitboxes(sf::RenderWindow &window) {
     OVERLOADED FUNCTIONS
 */
 
-void Board::update_check_piece(Position key, bool value) {
-    update_check_piece(key.first, key.second, value);
-}
+// void Board::update_check_piece(Position key, bool value) {
+//     update_check_piece(key.first, key.second, value);
+// }
 
 void Board::set_piece(char row, int col, Piece* val) {
     set_piece(std::make_pair(row, col), val);

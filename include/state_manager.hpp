@@ -21,6 +21,7 @@ public:
     void update_hitbox_state(char team, char row, int col, Hitbox *value);
     void refresh_hitbox_state(Piece* piece_hitbox_to_update);
     void add_moves_to_state(Piece* piece);
+    std::vector<Hitbox*> check_hitbox(Position pos);
 private:
     std::map<char, std::map<Position, std::vector<Hitbox*>>> HITBOX_STATES;
 };

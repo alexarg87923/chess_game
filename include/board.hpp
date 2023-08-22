@@ -41,8 +41,8 @@ public:
     static Piece* get_king(char team);
     static bool check_piece(Position key);
     static bool check_piece(char row, int col);
-    static void update_check_piece(Position key, bool value = false);
-    static void update_check_piece(char row, int col, bool value = false);
+    // static void update_check_piece(Position key, bool value = false);
+    // static void update_check_piece(char row, int col, bool value = false);
 
     static sf::RectangleShape get_grid_square_from_map(Position key);
     static sf::RectangleShape get_grid_square_from_map(char row, int col);
@@ -65,7 +65,7 @@ private:
     static std::map<Position, sf::RectangleShape> MAP_OF_GRID;
     static std::map<Position, Piece*> PIECES;
     static std::map<char, std::map<std::string, Piece*>> MAP_OF_PIECES;
-    static bool CHECK_PIECE_FAST[BOARD_ROW][BOARD_COL];
+    // static bool CHECK_PIECE_FAST[BOARD_ROW][BOARD_COL];
 
     std::vector<Hitbox*> HITBOXES;
 

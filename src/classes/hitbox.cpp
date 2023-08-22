@@ -23,6 +23,10 @@ Position Hitbox::get_position() {
     return position;
 }
 
+bool Hitbox::operator==(const Hitbox& other) const {
+    return position == other.position && parent == other.parent;
+}
+
 bool Hitbox::operator==(const Hitbox* other) const {
     return position == other->position && parent == other->parent;
 }

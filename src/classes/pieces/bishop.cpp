@@ -15,8 +15,6 @@ Bishop::Bishop(char row, int col, char team_color) : Piece(row, col, team_color)
 void Bishop::calc_valid_moves() {
     Piece::calc_valid_moves();
 
-    if (name != "king" && is_king_in_check()) return;
-
     valid_moves = get_moves(piece_position);
 
     Piece::calc_valid_moves();

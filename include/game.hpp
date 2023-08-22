@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Event.hpp>
+#include <SFML/System/Sleep.hpp>
 
 #include "state_manager.hpp"
 #include "board.hpp"
@@ -22,13 +23,14 @@ public:
     ~Game();
     void start();
 
-    static State_Manager get_hitbox_states();
+    static State_Manager *get_hitbox_states();
 
 private:
     sf::RenderWindow window;
     std::unique_ptr<Board> game_board;
     sf::Event event;
-    static State_Manager board_hitbox_state;
+    
+    static State_Manager *board_hitbox_state;
 
     void listen_left_click(sf::Event& event);
 

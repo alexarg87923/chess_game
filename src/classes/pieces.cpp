@@ -40,16 +40,29 @@ void Piece::update_position(Position pos) {
     set_position(pos);
 }
 
-
-
 void Piece::set_position(Position &pos) {
-    Board::update_check_piece(piece_position);
-    Board::set_piece(piece_position);
+    if(piece_position.first) {
+        Board::set_piece(piece_position);
+    }
+
+    refresh_affected_pieces(piece_position);
 
     piece_position = pos;
     Board::set_piece(piece_position, this);
-    Board::update_check_piece(piece_position, true);
     piece->setPosition(Board::pair_to_pos(piece_position));
+
+    refresh_affected_pieces(pos);
+}
+
+void Piece::refresh_affected_pieces(Position posin) {
+    auto curr_state = Game::get_hitbox_states();
+    auto hitboxes_at_pos = curr_state->check_hitbox(posin);
+
+    if (!hitboxes_at_pos.empty()){
+        for (auto &iter : hitboxes_at_pos) {
+            curr_state->refresh_hitbox_state(iter->get_parent());
+        }
+    }
 }
 
 bool Piece::validate_move(char row, int col) {
@@ -87,7 +100,7 @@ bool Piece::is_king_in_check() {
 }
 
 void Piece::calc_valid_moves() {
-    Game::get_hitbox_states().add_moves_to_state(this);
+    Game::get_hitbox_states()->add_moves_to_state(this);
 }
 
 char Piece::get_team() {
@@ -95,6 +108,7 @@ char Piece::get_team() {
 }
 
 bool Piece::is_this_move_going_to_stop_check(Position move) {
+    return false;
     if(!is_king_in_check())
         return false;
 
@@ -110,6 +124,11 @@ std::vector<Hitbox*> Piece::get_hitboxes() {
 void Piece::clear_hitboxes() {
     hitboxes.clear();
 }
+
+void Piece::add_hitbox(Hitbox *hitbox) {
+    hitboxes.push_back(hitbox);
+}
+
 
 /*
     OVERLOADED FUNCTIONS

@@ -18,8 +18,8 @@ public:
     sf::RectangleShape get_hitbox();
     Position get_position();
     
+    bool operator==(const Hitbox& other) const;
     bool operator==(const Hitbox* other) const;
-
 private:
     Piece* parent;
     sf::RectangleShape hitbox;

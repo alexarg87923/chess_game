@@ -16,8 +16,6 @@ King::King(char row, int col, char team_color) : Piece(row, col, team_color) {
 void King::calc_valid_moves() {
     valid_moves.clear();
 
-    if (name != "king" && is_king_in_check()) return;
-
     valid_moves = get_moves(piece_position);
 
     Piece::calc_valid_moves();
@@ -63,8 +61,7 @@ void King::update_position(Position pos) {
 }
 
 bool King::is_in_check() {
-    return false;
-    // return Game::get_hitbox_states().check_hitbox((team == 'w') ? 'b' : 'w', piece_position);
+    return (Game::get_hitbox_states()->check_hitbox((team == 'w') ? 'b' : 'w', piece_position).empty() ? false : true);
 }
 
 
