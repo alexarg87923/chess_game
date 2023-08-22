@@ -65,34 +65,26 @@ std::vector<Position> Move_Handler::check_for_obstructions_and_valid_moves(std::
                 while (!queue.empty()) {
                     const Position& nextPos = queue.front();
                     auto pieceOpt = game_board.get_piece(nextPos);
+                    auto moveAttr = moves_pair.first;
 
-                    if (moves_pair.first == MoveAttributes::OBSTRUCT_ON_OCCUPY) {
-                        if (pieceOpt.has_value()) {
-                            add_obstructed(nextPos, inc_piece);
-                            break;
-                        } else {
-                            valid_moves.push_back(nextPos);
-                        }
-                    } else if (moves_pair.first == MoveAttributes::VALID_ON_ENEMY_ONLY && pieceOpt.has_value()) {
+                    if (pieceOpt.has_value()) {
                         auto piece = pieceOpt.value();
-                        if (piece->get_team() != inc_piece->get_team()) {
+
+                        if (piece->get_team() != inc_piece->get_team() && 
+                            (moveAttr == MoveAttributes::VALID_ON_ENEMY_ONLY || moveAttr == MoveAttributes::SEARCH)) {
                             valid_moves.push_back(nextPos);
                         }
                         add_obstructed(nextPos, inc_piece);
-                        break; // stop checking further in this direction as there's an obstruction
-                    } else if (moves_pair.first == MoveAttributes::SEARCH) {
-                        if (pieceOpt.has_value()) {
-                            auto piece = pieceOpt.value();
-                            if (piece->get_team() != inc_piece->get_team()) {
-                                valid_moves.push_back(nextPos);
-                            }
-                            add_obstructed(nextPos, inc_piece);
-                            break; // stop checking further in this direction as there's an obstruction
-                        } else {
-                            valid_moves.push_back(nextPos);
-                        }
+                        queue.pop();
+                        break;
                     }
-                    queue.pop(); // move to the next position in this direction
+
+                    if (moveAttr == MoveAttributes::OBSTRUCT_ON_OCCUPY || moveAttr == MoveAttributes::SEARCH) {
+                        valid_moves.push_back(nextPos);
+                    }
+
+                    queue.pop();
+
                 }
             }
         }
