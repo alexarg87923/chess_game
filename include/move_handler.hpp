@@ -27,7 +27,7 @@ private:
     std::queue<std::shared_ptr<Piece>> deferred_pieces;
     std::set<std::shared_ptr<Piece>> processed_pieces;
 
-    std::pair<std::vector<Position>, std::vector<std::shared_ptr<Piece>>> check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::map<int, std::queue<Position>> moves);
+    std::vector<Position> check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::map<int, std::queue<Position>> moves);
     void reset_hitboxes(std::shared_ptr<Piece> piece);
     void reset_obstructed_at(const Position pos);
 

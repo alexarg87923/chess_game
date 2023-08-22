@@ -7,15 +7,16 @@ Move_Handler::Move_Handler(Board& incoming_game_board) :
 {}
 
 void Move_Handler::move_piece(std::shared_ptr<Piece> piece, Position pos) {
-    auto position = piece->get_pos();
+    auto position = piece->get_pos(); // get old pos
 
     game_board.set_piece(position, nullptr); // clear the old position of the piece
 
-    reset_obstructed_at(position);
+    reset_obstructed_at(position); // if pieces were being obstructed, now that i removed the piece from the board, i can recalculate
+                                    // and see if the piece is still obstructed
 
     piece->set_piece_pos(pos); // set the configuratoin of the piece
 
-    piece->invalidate_moves();
+    piece->invalidate_moves(); // since piece now has a new position then old moves are invalid
 
     place_piece(piece); // place the piece on the state manager
 }
@@ -29,12 +30,13 @@ void Move_Handler::reset_hitboxes(std::shared_ptr<Piece> piece) {
 
 void Move_Handler::place_piece(const std::shared_ptr<Piece> piece) {
     Piece& p = *piece;
-    auto pos = p.get_pos();
+    auto pos = p.get_pos(); // position to set it to
 
-    reset_hitboxes(piece);
+    reset_hitboxes(piece); // reset the hitboxes if there are any
 
     std::map<int, std::__1::queue<Position>> moves;
 
+    // check for cached moves
     if (p.moves_are_valid()) {
         moves = p.get_moves();
     } else {
@@ -45,21 +47,25 @@ void Move_Handler::place_piece(const std::shared_ptr<Piece> piece) {
         reset_obstructed_at(pos);
     }
 
-    auto pair = check_for_obstructions_and_valid_moves(piece, moves);
+    // look for valid moves
+    std::vector<Position> valid_moves = check_for_obstructions_and_valid_moves(piece, moves);
 
-    hitbox_manager.add_moves_to_state(piece, pair.first);
+    // add the valid moves to the hitbox manager
+    hitbox_manager.add_moves_to_state(piece, valid_moves);
 
+
+    // update the pieces that need updating now
     while (!deferred_pieces.empty()) {
         auto piece_to_place = deferred_pieces.front();
         deferred_pieces.pop();
         place_piece(piece_to_place);
     }
 
+    // clear the queue
     processed_pieces.clear();
 }
 
-std::pair<std::vector<Position>, std::vector<std::shared_ptr<Piece>>> Move_Handler::check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::map<int, std::queue<Position>> moves) {
-    std::vector<std::shared_ptr<Piece>> obstructing_pieces;
+std::vector<Position> Move_Handler::check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::map<int, std::queue<Position>> moves) {
     std::vector<Position> valid_moves;
 
     for (auto & pair : moves) {
@@ -80,7 +86,7 @@ std::pair<std::vector<Position>, std::vector<std::shared_ptr<Piece>>> Move_Handl
         }
     }
 
-    return {valid_moves, obstructing_pieces};
+    return valid_moves;
 }
 
 
@@ -103,7 +109,6 @@ void Move_Handler::check_if_im_obstructing(const Position pos, std::shared_ptr<P
     auto hitboxes = hitbox_manager.check_hitbox(pos);
 
     if (!hitboxes.empty()) {
-        // add_obstruction(pos, piece);
         for (auto const & hitbox : hitboxes) {
             add_obstructed(pos, hitbox->get_parent());
         }
