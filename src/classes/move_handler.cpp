@@ -40,13 +40,10 @@ void Move_Handler::place_piece(const std::shared_ptr<Piece> piece) {
     } else {
         moves = p.calc_moves(pos);
         p.cache_moves(moves);
+        game_board.set_piece(pos, piece);
+        check_if_im_obstructing(pos, piece);
+        reset_obstructed_at(pos);
     }
-
-    game_board.set_piece(pos, piece);
-
-    check_if_im_obstructing(pos, piece);
-    
-    reset_obstructed_at(pos);
 
     auto pair = check_for_obstructions_and_valid_moves(piece, moves);
 
