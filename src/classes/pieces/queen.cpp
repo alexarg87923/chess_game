@@ -13,11 +13,13 @@ Queen::Queen(char row, int col, char team_color) : Piece(row, col, team_color) {
 
 
 void Queen::calc_valid_moves() {
-    Piece::calc_valid_moves();
+    valid_moves.clear();
 
     if (name != "king" && is_king_in_check()) return;
 
     valid_moves = Queen::get_moves(piece_position);
+
+    Piece::calc_valid_moves();
 }
 
 std::vector<Position> Queen::get_moves(Position pos, bool get_every_move) {

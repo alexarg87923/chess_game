@@ -40,6 +40,8 @@ void Piece::update_position(Position pos) {
     set_position(pos);
 }
 
+
+
 void Piece::set_position(Position &pos) {
     Board::update_check_piece(piece_position);
     Board::set_piece(piece_position);
@@ -85,7 +87,7 @@ bool Piece::is_king_in_check() {
 }
 
 void Piece::calc_valid_moves() {
-    valid_moves.clear();
+    Game::get_hitbox_states().add_moves_to_state(this);
 }
 
 char Piece::get_team() {

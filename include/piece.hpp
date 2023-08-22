@@ -13,7 +13,6 @@
 #include "types.hpp"
 #include "chess_ai.hpp"
 
-// class Hitbox;
 class King;
 
 class Piece {
@@ -34,6 +33,7 @@ public:
     virtual void update_position(Position pos);
     virtual void calc_valid_moves();
     virtual std::vector<Position> get_moves(Position pos, bool get_every_move) = 0;
+
 protected:
     sf::RectangleShape* piece;
     std::vector<Position> valid_moves;

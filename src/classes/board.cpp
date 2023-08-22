@@ -165,10 +165,11 @@ Piece* Board::get_piece_from_map(char team, std::string name) {
 
 
 
+
 std::optional<Position> Board::check_clicked_hitbox(sf::Vector2i mouse_pos) {
     for (auto each : HITBOXES) {
-        if(each.second->get_hitbox().getGlobalBounds().contains(mouse_pos.x, mouse_pos.y)) {
-            return each.first;
+        if(each->get_hitbox().getGlobalBounds().contains(mouse_pos.x, mouse_pos.y)) {
+            return each->get_position();
         }
     }
     return std::nullopt;
@@ -184,15 +185,7 @@ void Board::make_hitboxes() {
         return;
     }
 
-    // auto valid_moves = selected_piece->get_valid_moves();
-
-    // for (auto move : valid_moves) {
-    //     Hitbox *tmp = new Hitbox(GRID_SQUARE_SIZE, move, pair_to_pos(move), (check_piece(move) ? sf::Color(0, 0, 255, 128) : sf::Color(0, 0, 255)), selected_piece);
-
-    //     HITBOXES[move] = tmp;
-    // }
-
-    selected_piece->get_hitboxes();
+    HITBOXES = selected_piece->get_hitboxes();
 }
 
 void Board::draw_hitboxes(sf::RenderWindow &window) {
@@ -201,7 +194,7 @@ void Board::draw_hitboxes(sf::RenderWindow &window) {
     }
 
     for (auto each : HITBOXES) {
-        window.draw(each.second->get_hitbox());
+        window.draw(each->get_hitbox());
     }
 }
 

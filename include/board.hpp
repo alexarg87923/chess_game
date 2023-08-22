@@ -67,7 +67,7 @@ private:
     static std::map<char, std::map<std::string, Piece*>> MAP_OF_PIECES;
     static bool CHECK_PIECE_FAST[BOARD_ROW][BOARD_COL];
 
-    std::map<Position, Hitbox*> HITBOXES;
+    std::vector<Hitbox*> HITBOXES;
 
     static sf::Vector2f MAP_OF_POSITIONS[BOARD_ROW][BOARD_COL];
     Piece* selected_piece = nullptr;

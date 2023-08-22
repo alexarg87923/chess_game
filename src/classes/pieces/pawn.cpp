@@ -14,11 +14,13 @@ Pawn::Pawn(char row, int col, char team_color) : Piece(row, col, team_color) {
 
 
 void Pawn::calc_valid_moves() {
-    Piece::calc_valid_moves();
+    valid_moves.clear();
 
     if (name != "king" && is_king_in_check()) return;
 
     valid_moves = get_moves(piece_position);
+    
+    Piece::calc_valid_moves();
 }
 
 std::vector<Position> Pawn::get_moves(Position pos, bool get_every_move) {

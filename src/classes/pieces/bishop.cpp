@@ -18,6 +18,8 @@ void Bishop::calc_valid_moves() {
     if (name != "king" && is_king_in_check()) return;
 
     valid_moves = get_moves(piece_position);
+
+    Piece::calc_valid_moves();
 }
 
 std::vector<Position> Bishop::get_moves(Position pos, bool get_every_move) {
