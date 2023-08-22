@@ -7,42 +7,29 @@ Move_Handler::Move_Handler(Board& incoming_game_board) :
 {}
 
 void Move_Handler::move_piece(std::shared_ptr<Piece> piece, Position pos) {
+    // auto position = piece->get_pos();
 
-    auto position = piece->get_pos();
+    // if (obstruction_manager.find(position) != obstruction_manager.end()) {
+    //     auto& obstructed_pieces = obstruction_manager[position];
+    //     for (const auto& obstructed_piece : obstructed_pieces) {
+    //         // Update each obstructing piece
+    //         reset_hitboxes(obstructed_piece);
+    //         place_piece(obstructed_piece);
+    //     }
+    //     // Remove this piece from the obstruction manager
+    //     obstruction_manager.erase(position);
+    // }
 
-    auto hitboxes = hitbox_manager.check_hitbox(position);
+    // game_board.set_piece(piece); // clear the old position of the piece
 
-    if(!hitboxes.empty()) {
-        for (const auto & hitbox : hitboxes) {
-            auto parent = hitbox->get_parent();
-            parent->invalidate_moves();
-            update_piece(parent);
-            place_piece(parent);
-        }
-    }
+    // piece->set_piece_pos(pos); // set the configuratoin of the piece
 
-    if (obstruction_manager.find(position) != obstruction_manager.end()) {
-        auto& obstructed_pieces = obstruction_manager[position];
-        for (const auto& obstructed_piece : obstructed_pieces) {
-            // Update each obstructing piece
-            update_piece(obstructed_piece);
-            place_piece(obstructed_piece);
-        }
-        // Remove this piece from the obstruction manager
-        obstruction_manager.erase(position);
-    }
+    // reset_hitboxes(piece);
 
-    game_board.set_piece(position); // clear the old position of the piece
-
-    piece->set_piece_pos(pos); // set the configuratoin of the piece
-    piece->invalidate_moves();
-
-    update_piece(piece);
-
-    place_piece(piece); // place the piece on the state manager
+    // place_piece(piece); // place the piece on the state manager
 }
 
-void Move_Handler::update_piece(std::shared_ptr<Piece> piece) {
+void Move_Handler::reset_hitboxes(std::shared_ptr<Piece> piece) {
     Piece& p = *piece;
 
     hitbox_manager.remove_hitboxes_from_state(piece);
@@ -52,32 +39,18 @@ void Move_Handler::update_piece(std::shared_ptr<Piece> piece) {
 void Move_Handler::place_piece(const std::shared_ptr<Piece> piece) {
     Piece& p = *piece;
     auto pos = piece->get_pos();
-    
-    // Calculate or get cached moves
-    std::map<int, std::queue<Position>> moves;
-    if (!p.moves_are_valid()) {
-        moves = piece->calc_moves(pos);
-        p.cache_moves(moves);
-    } else {
-        moves = p.get_moves();
-    }
+    auto moves = piece->calc_moves(pos);
 
     game_board.set_piece(piece);
 
-    auto hitboxes = hitbox_manager.check_hitbox(pos);
-
-    if(!hitboxes.empty()) {
-        for (const auto & hitbox : hitboxes) {
-            auto parent = hitbox->get_parent();
-            parent->invalidate_moves();
-            update_piece(parent);
-            place_piece(parent);
-        }
-    }
-
     auto pair = check_for_obstructions_and_valid_moves(piece, moves);
+
     if (!pair.second.empty()) {
         obstruction_manager[pos] = pair.second;
+        for (auto const & obstr : pair.second) {
+            reset_hitboxes(obstr);
+            place_piece(obstr);
+        }
     }
 
     hitbox_manager.add_moves_to_state(piece, pair.first);

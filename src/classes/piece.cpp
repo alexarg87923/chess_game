@@ -105,6 +105,7 @@ bool Piece::moves_are_valid() const {
     return are_moves_valid;
 }
 
+
 /*
     OVERLOADED FUNCTIONS
 */

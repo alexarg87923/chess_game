@@ -53,7 +53,7 @@ protected:
 
     std::map<int, std::queue<Position>> cached_moves;
     bool are_moves_valid = false;
-
+    
     virtual bool validate_in_bounds(char row, int col) const;
     virtual bool validate_in_bounds(const Position& pos) const;
 
