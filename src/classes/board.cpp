@@ -165,10 +165,6 @@ Piece* Board::get_piece_from_map(char team, std::string name) {
     return MAP_OF_PIECES[team][name];
 }
 
-
-
-
-
 std::optional<Position> Board::check_clicked_hitbox(sf::Vector2i mouse_pos) {
     for (auto each : HITBOXES) {
         if(each->get_hitbox().getGlobalBounds().contains(mouse_pos.x, mouse_pos.y)) {

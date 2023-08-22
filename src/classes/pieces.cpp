@@ -45,25 +45,31 @@ void Piece::set_position(Position &pos) {
         Board::set_piece(piece_position);
     }
 
-    refresh_affected_pieces(piece_position);
+    auto curr_state = Game::get_hitbox_states();
+
+    auto hitboxes_at_old_pos = curr_state->check_hitbox(piece_position);
 
     piece_position = pos;
     Board::set_piece(piece_position, this);
     piece->setPosition(Board::pair_to_pos(piece_position));
 
-    refresh_affected_pieces(pos);
+    auto hitboxes_at_new_pos = curr_state->check_hitbox(piece_position);
+
+    hitboxes_at_new_pos.insert(hitboxes_at_new_pos.end(), hitboxes_at_old_pos.begin(), hitboxes_at_old_pos.end());
+
+    refresh_affected_pieces(hitboxes_at_new_pos);
 }
 
-void Piece::refresh_affected_pieces(Position posin) {
-    auto curr_state = Game::get_hitbox_states();
-    auto hitboxes_at_pos = curr_state->check_hitbox(posin);
+void Piece::refresh_affected_pieces(const std::vector<Hitbox*>& affected_hitboxes) {
+    if (affected_hitboxes.empty()) return;
 
-    if (!hitboxes_at_pos.empty()){
-        for (auto &iter : hitboxes_at_pos) {
-            curr_state->refresh_hitbox_state(iter->get_parent());
-        }
+    auto curr_state = Game::get_hitbox_states();
+
+    for (const auto& hitbox : affected_hitboxes) {
+        curr_state->refresh_hitbox_state(hitbox->get_parent());
     }
 }
+
 
 bool Piece::validate_move(char row, int col) {
     // If position is out of bounds, return false, else true

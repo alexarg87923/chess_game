@@ -57,7 +57,7 @@ protected:
 private:
     void set_position(Position &pos);
     std::string get_working_dir();
-    void refresh_affected_pieces(Position pos);
+    void refresh_affected_pieces(const std::vector<Hitbox*>& pos);
 
 };
 
