@@ -88,15 +88,15 @@ void Piece::invalidate_moves() {
     are_moves_valid = false;
 }
 
-const std::map<int, std::queue<Position>>& Piece::get_moves() const {
+const std::map<MoveAttributes, std::vector<std::queue<Position>>>& Piece::get_moves() const {
     return cached_moves;
 }
 
-std::map<int, std::queue<Position>>& Piece::get_moves_mutable() {
+std::map<MoveAttributes, std::vector<std::queue<Position>>>& Piece::get_moves_mutable() {
     return cached_moves;
 }
 
-void Piece::cache_moves(const std::map<int, std::queue<Position>>& moves) {
+void Piece::cache_moves(const std::map<MoveAttributes, std::vector<std::queue<Position>>>& moves) {
     cached_moves = moves;
     are_moves_valid = true;
 }

@@ -6,20 +6,25 @@ Knight::~Knight(){}
 Knight::Knight(const Position& pos, Color team_color, sf::Vector2f size) : Knight(pos.row, pos.col, team_color, size) {}
 Knight::Knight(char row, int col, Color team_color, sf::Vector2f size) : Piece(row, col, team_color, "knight", size) {}
 
-std::map<int, std::queue<Position>> Knight::calc_moves(const Position& pos) const {
+std::map<MoveAttributes, std::vector<std::queue<Position>>> Knight::calc_moves(const Position& pos) const {
     std::pair<int, int> offsets[] = {{1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}};
 
-    std::map<int, std::queue<Position>> moves;
+    std::map<MoveAttributes, std::vector<std::queue<Position>>> moves;
+    moves[MoveAttributes::SEARCH].emplace_back();
     int direction = 0;
 
     for (const auto& offset : offsets) {
         int newX = piece_position.row + offset.first;
         int newY = piece_position.col + offset.second;
 
+        std::queue<Position> tmp;
+
         if (!validate_in_bounds(newX, newY)) 
             continue;
 
-        moves[direction++].push(Position{static_cast<char>(newX), newY});
+        tmp.push(Position{static_cast<char>(newX), newY});
+
+        moves[MoveAttributes::SEARCH].push_back(tmp);
     }
     return moves;
 }

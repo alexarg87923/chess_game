@@ -16,6 +16,6 @@ public:
     Bishop(char row, int col, Color team_color, sf::Vector2f size);
     Bishop(const Position& pos, Color team_color, sf::Vector2f size);
 
-    virtual std::map<int, std::queue<Position>> calc_moves(const Position& pos) const override;
+    virtual std::map<MoveAttributes, std::vector<std::queue<Position>>> calc_moves(const Position& pos) const override;
 };
 

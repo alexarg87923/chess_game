@@ -16,6 +16,6 @@ struct Position {
 };
 
 enum Color {
-    WHITE,
-    BLACK
+    WHITE = 1,
+    BLACK = -1
 };

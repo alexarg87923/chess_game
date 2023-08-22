@@ -14,7 +14,7 @@ public:
     Knight(char row, int col, Color team_color, sf::Vector2f size);
     Knight(const Position &pos, Color team_color, sf::Vector2f size);
 
-    std::map<int, std::queue<Position>> calc_moves(const Position& pos) const override;
+    std::map<MoveAttributes, std::vector<std::queue<Position>>> calc_moves(const Position& pos) const override;
 };
 
 #endif

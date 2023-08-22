@@ -1,7 +1,5 @@
 #include "move_handler.hpp"
 
-#include "piece.hpp"
-
 Move_Handler::Move_Handler(Board& incoming_game_board) :
     game_board(incoming_game_board), hitbox_manager(game_board)
 {}
@@ -31,21 +29,11 @@ void Move_Handler::reset_hitboxes(std::shared_ptr<Piece> piece) {
 void Move_Handler::place_piece(const std::shared_ptr<Piece> piece) {
     Piece& p = *piece;
     auto pos = p.get_pos(); // position to set it to
-
+    
     reset_hitboxes(piece); // reset the hitboxes if there are any
 
-    std::map<int, std::__1::queue<Position>> moves;
-
     // check for cached moves
-    if (p.moves_are_valid()) {
-        moves = p.get_moves();
-    } else {
-        moves = p.calc_moves(pos);
-        p.cache_moves(moves);
-        game_board.set_piece(pos, piece);
-        check_if_im_obstructing(pos, piece);
-        reset_obstructed_at(pos);
-    }
+    std::map<MoveAttributes, std::vector<std::queue<Position>>> moves = check_cache(pos, piece);
 
     // look for valid moves
     std::vector<Position> valid_moves = check_for_obstructions_and_valid_moves(piece, moves);
@@ -53,43 +41,80 @@ void Move_Handler::place_piece(const std::shared_ptr<Piece> piece) {
     // add the valid moves to the hitbox manager
     hitbox_manager.add_moves_to_state(piece, valid_moves);
 
-
     // update the pieces that need updating now
-    while (!deferred_pieces.empty()) {
-        auto piece_to_place = deferred_pieces.front();
-        deferred_pieces.pop();
-        place_piece(piece_to_place);
-    }
+    update_deferred_pieces();
 
     // clear the queue
     processed_pieces.clear();
 }
 
-std::vector<Position> Move_Handler::check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::map<int, std::queue<Position>> moves) {
+void Move_Handler::update_deferred_pieces() {
+    while (!deferred_pieces.empty()) {
+        auto piece_to_place = deferred_pieces.front();
+        deferred_pieces.pop();
+        place_piece(piece_to_place);
+    }
+}
+
+std::vector<Position> Move_Handler::check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::map<MoveAttributes, std::vector<std::queue<Position>>> moves) {
     std::vector<Position> valid_moves;
 
-    for (auto & pair : moves) {
-        while (!pair.second.empty()) {
-            Position nextPos = pair.second.front();
-            auto pieceOpt = game_board.get_piece(nextPos);
-            if (pieceOpt.has_value()) {
-                auto piece = pieceOpt.value();
-                if (piece->get_team() != inc_piece->get_team()) {
-                    valid_moves.push_back(nextPos);
+    for (auto & moves_pair : moves) {
+        if (!moves_pair.second.empty()) {
+            for (auto & queue : moves_pair.second) {
+                while (!queue.empty()) {
+                    const Position& nextPos = queue.front();
+                    auto pieceOpt = game_board.get_piece(nextPos);
+
+                    if (moves_pair.first == MoveAttributes::OBSTRUCT_ON_OCCUPY) {
+                        if (pieceOpt.has_value()) {
+                            add_obstructed(nextPos, inc_piece);
+                            break;
+                        } else {
+                            valid_moves.push_back(nextPos);
+                        }
+                    } else if (moves_pair.first == MoveAttributes::VALID_ON_ENEMY_ONLY && pieceOpt.has_value()) {
+                        auto piece = pieceOpt.value();
+                        if (piece->get_team() != inc_piece->get_team()) {
+                            valid_moves.push_back(nextPos);
+                        }
+                        add_obstructed(nextPos, inc_piece);
+                        break; // stop checking further in this direction as there's an obstruction
+                    } else if (moves_pair.first == MoveAttributes::SEARCH) {
+                        if (pieceOpt.has_value()) {
+                            auto piece = pieceOpt.value();
+                            if (piece->get_team() != inc_piece->get_team()) {
+                                valid_moves.push_back(nextPos);
+                            }
+                            add_obstructed(nextPos, inc_piece);
+                            break; // stop checking further in this direction as there's an obstruction
+                        } else {
+                            valid_moves.push_back(nextPos);
+                        }
+                    }
+                    queue.pop(); // move to the next position in this direction
                 }
-                add_obstructed(nextPos, inc_piece);
-                break; // stop checking further in this direction as there's an obstruction
-            } else {
-                valid_moves.push_back(nextPos);
             }
-            pair.second.pop(); // move to the next position in this direction
         }
     }
 
     return valid_moves;
 }
 
+std::map<MoveAttributes, std::vector<std::queue<Position>>> Move_Handler::check_cache(Position pos, std::shared_ptr<Piece> piece) {
+    Piece& p = *piece;
 
+    if (p.moves_are_valid()) {
+        return p.get_moves();
+    } else {
+        auto moves = p.calc_moves(pos);
+        p.cache_moves(moves);
+        game_board.set_piece(pos, piece);
+        check_if_im_obstructing(pos, piece);
+        reset_obstructed_at(pos);
+        return moves;
+    }
+}
 
 void Move_Handler::reset_obstructed_at(const Position pos) {    
     if (obstructed_pieces_manager.find(pos) != obstructed_pieces_manager.end()) {

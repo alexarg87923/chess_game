@@ -8,6 +8,13 @@
 
 #include <queue>
 #include <map>
+#include <vector>
+
+enum MoveAttributes {
+    OBSTRUCT_ON_OCCUPY,  // Move is obstructed if the square is occupied.
+    VALID_ON_ENEMY_ONLY,     // Move is valid if the square has an enemy piece
+    SEARCH    // Move is valid if the square is empty.
+};
 
 
 #include "types.hpp"
@@ -35,14 +42,14 @@ public:
     void set_piece_pos(Position pos);
     void set_position(sf::Vector2f pos);
 
-    virtual std::map<int, std::queue<Position>> calc_moves(const Position& pos) const = 0;
+    virtual std::map<MoveAttributes, std::vector<std::queue<Position>>> calc_moves(const Position& pos) const = 0;
 
     bool operator==(const Piece& other) const;
 
     bool moves_are_valid() const;
-    void cache_moves(const std::map<int, std::queue<Position>>& moves);
-    std::map<int, std::queue<Position>>& get_moves_mutable();
-    const std::map<int, std::queue<Position>>& get_moves() const;
+    void cache_moves(const std::map<MoveAttributes, std::vector<std::queue<Position>>>& moves);
+    std::map<MoveAttributes, std::vector<std::queue<Position>>>& get_moves_mutable();
+    const std::map<MoveAttributes, std::vector<std::queue<Position>>>& get_moves() const;
     void invalidate_moves();
 protected:
     std::unique_ptr<sf::RectangleShape> piece_rect_obj;
@@ -51,7 +58,8 @@ protected:
     std::vector<std::shared_ptr<Hitbox>> hitboxes;
     std::string piece_name;
 
-    std::map<int, std::queue<Position>> cached_moves;
+    std::map<MoveAttributes, std::vector<std::queue<Position>>> cached_moves;
+
     bool are_moves_valid = false;
     
     virtual bool validate_in_bounds(char row, int col) const;
