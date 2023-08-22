@@ -5,8 +5,9 @@
 Game::Game() : 
     window(sf::RenderWindow(sf::VideoMode(2560, 1606), "Chesst Game")),
     game_board(Board(window.getSize())),
-    board_hitbox_state(State_Manager(game_board)),
-    move_handler(game_board, board_hitbox_state)
+    move_handler(game_board)
+    // board_hitbox_state(Hitbox_Manager(game_board)),
+    // move_handler(game_board, board_hitbox_state)
 {}
 
 void Game::start() {
@@ -32,22 +33,22 @@ void Game::start() {
 void Game::initialize_pieces() {
     auto size_of_grid_square = game_board.get_size_of_grid_square();
 
-    auto white_king = std::make_shared<King>('E', 1, WHITE, size_of_grid_square, move_handler);
+    auto white_king = std::make_shared<King>('E', 1, WHITE, size_of_grid_square);
     move_handler.place_piece(white_king);
     game_board.set_king(white_king);
 
 
-    move_handler.place_piece(std::make_shared<Pawn>('A', 1, WHITE, size_of_grid_square, move_handler));
+    move_handler.place_piece(std::make_shared<Pawn>('A', 1, WHITE, size_of_grid_square));
 
-    move_handler.place_piece(std::make_shared<Pawn>('B', 8, BLACK, size_of_grid_square, move_handler));
-    move_handler.place_piece(std::make_shared<Pawn>('C', 8, BLACK, size_of_grid_square, move_handler));
+    move_handler.place_piece(std::make_shared<Pawn>('B', 8, BLACK, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Pawn>('C', 8, BLACK, size_of_grid_square));
 
-    move_handler.place_piece(std::make_shared<Queen>('E', 4, BLACK, size_of_grid_square, move_handler));
-    move_handler.place_piece(std::make_shared<Bishop>('B', 5, BLACK, size_of_grid_square, move_handler));
+    move_handler.place_piece(std::make_shared<Queen>('E', 4, BLACK, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Bishop>('B', 5, BLACK, size_of_grid_square));
 
-    move_handler.place_piece(std::make_shared<Bishop>('C', 1, WHITE, size_of_grid_square, move_handler));
-    move_handler.place_piece(std::make_shared<Rook>('H', 1, WHITE, size_of_grid_square, move_handler));
-    move_handler.place_piece(std::make_shared<Knight>('G', 1, WHITE, size_of_grid_square, move_handler));
+    move_handler.place_piece(std::make_shared<Bishop>('C', 1, WHITE, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Rook>('H', 1, WHITE, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Knight>('G', 1, WHITE, size_of_grid_square));
 }
 
 void Game::handle_frame_rate(const float& FRAME_RATE, sf::Clock& clock) {

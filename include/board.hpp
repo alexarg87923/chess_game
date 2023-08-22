@@ -6,7 +6,7 @@
 
 #include <map>
 
-#include "constant.hpp"
+#include "constants.hpp"
 #include "types.hpp"
 
 #include "hitbox.hpp"

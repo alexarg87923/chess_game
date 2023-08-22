@@ -5,14 +5,17 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 
 #include "piece.hpp"
+#include "constants.hpp"
 
 class Rook : virtual public Piece {
 public:
-    Rook(char row, int col, Color team_color, sf::Vector2f size, Move_Handler& handler);
-    Rook(const Position& pos, Color team_color, sf::Vector2f size, Move_Handler& handler);
+    Rook();
+    ~Rook();
 
-protected:
-    virtual std::vector<Position> get_moves(const Position& pos, bool get_every_move = false) const override;
+    Rook(char row, int col, Color team_color, sf::Vector2f size);
+    Rook(const Position& pos, Color team_color, sf::Vector2f size);
+
+    virtual std::map<int, std::queue<Position>> calc_moves(const Position& pos) const;
 };
 
 #endif

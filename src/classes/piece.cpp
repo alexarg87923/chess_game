@@ -2,24 +2,19 @@
 
 #include "hitbox.hpp"
 
-Piece::Piece(Move_Handler& handler) :
-    move_handler(handler)
+Piece::Piece(){}
+Piece::~Piece(){}
+
+Piece::Piece(char row, int col, Color team_color, const std::string& name, sf::Vector2f size) :
+    Piece(Position{row, col}, team_color, name, size)
 {}
 
-Piece::Piece(char row, int col, Color team_color, const std::string& name, sf::Vector2f size, Move_Handler& handler) :
-    Piece(Position{row, col}, team_color, name, size, handler)
-{}
-
-Piece::Piece(const Position& pos, Color team_color, const std::string& name, sf::Vector2f size, Move_Handler& handler) :
-    move_handler(handler) 
-{
+Piece::Piece(const Position& pos, Color team_color, const std::string& name, sf::Vector2f size) {
     piece_rect_obj = std::make_unique<sf::RectangleShape>(size);
     piece_rect_obj->setTexture(load_sprite(name, team_color));
 
     piece_name = name;
-
     team = team_color;
-
     piece_position = pos;
 }
 
@@ -41,18 +36,6 @@ void Piece::draw(sf::RenderTarget& target) const {
     target.draw(*piece_rect_obj);
 }
 
-std::vector<Position> Piece::get_valid_moves() const {
-    return valid_moves;
-}
-
-void Piece::set_valid_moves(std::vector<Position> incoming_valid_moves) {
-    valid_moves = incoming_valid_moves;
-}
-
-void Piece::clear_valid_moves() {
-    valid_moves.clear();
-}
-
 Position Piece::get_pos() const {
     return piece_position;
 }
@@ -70,7 +53,7 @@ void Piece::set_piece_pos(Position pos) {
 }
 
 
-bool Piece::validate_move(char row, int col) const {
+bool Piece::validate_in_bounds(char row, int col) const {
     // If position is out of bounds, return false, else true
     if (row > 'H' || row < 'A' || col > 8 || col < 1) {
         return false;
@@ -101,15 +84,31 @@ void Piece::add_hitbox(std::shared_ptr<Hitbox> hitbox) {
     hitboxes.push_back(hitbox);
 }
 
-void Piece::add_valid_move(Position pos) {
-    valid_moves.push_back(pos);
+void Piece::invalidate_moves() {
+    are_moves_valid = false;
 }
 
+const std::map<int, std::queue<Position>>& Piece::get_moves() const {
+    return cached_moves;
+}
+
+std::map<int, std::queue<Position>>& Piece::get_moves_mutable() {
+    return cached_moves;
+}
+
+void Piece::cache_moves(const std::map<int, std::queue<Position>>& moves) {
+    cached_moves = moves;
+    are_moves_valid = true;
+}
+
+bool Piece::moves_are_valid() const {
+    return are_moves_valid;
+}
 
 /*
     OVERLOADED FUNCTIONS
 */
 
-bool Piece::validate_move(const Position &pos) const {
-    return validate_move(pos.row, pos.col);
+bool Piece::validate_in_bounds(const Position &pos) const {
+    return validate_in_bounds(pos.row, pos.col);
 }

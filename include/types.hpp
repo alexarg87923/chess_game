@@ -1,5 +1,4 @@
-#ifndef TYPES_H
-#define TYPES_H
+#pragma once
 
 struct Position {
     char row;
@@ -20,5 +19,3 @@ enum Color {
     WHITE,
     BLACK
 };
-
-#endif

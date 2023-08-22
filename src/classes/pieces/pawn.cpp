@@ -1,34 +1,50 @@
 #include "pieces/pawn.hpp"
 
-Pawn::Pawn(const Position& pos, Color team_color, sf::Vector2f size, Move_Handler& handler) : Pawn(pos.row, pos.col, team_color, size, handler) {}
-Pawn::Pawn(char row, int col, Color team_color, sf::Vector2f size, Move_Handler& handler) : Piece(row, col, team_color, "pawn", size, handler) {
-    valid_moves = get_moves(piece_position);
-}
+Pawn::Pawn(){}
+Pawn::~Pawn(){}
 
-std::vector<Position> Pawn::get_moves(const Position& pos, bool get_every_move) const {
-    std::vector<Position> moves;
+Pawn::Pawn(const Position& pos, Color team_color, sf::Vector2f size) : Pawn(pos.row, pos.col, team_color, size) {}
+Pawn::Pawn(char row, int col, Color team_color, sf::Vector2f size) : Piece(row, col, team_color, "pawn", size) {}
+
+std::map<int, std::queue<Position>> Pawn::calc_moves(const Position& pos) const {
+    enum MovementType {
+    DIAGONAL = 0,
+    STRAIGHT = 1
+    };
+
+    const std::pair<int, int> INITIAL_OFFSETS[4] = {
+    {0, 1},   // Forward move for WHITE
+    {1, 1},   // Diagonal right move for WHITE
+    {-1, 1},  // Diagonal left move for WHITE
+    {0, 0}    // Placeholder
+};
+
+    std::map<int, std::queue<Position>> moves;
     Position pos_copy = pos;
 
-    int direction = (team == WHITE) ? 1 : -1;
+    int direction = (team == WHITE) ? WHITE : BLACK;
 
-    std::pair<int, int> offsets[4] = {
-        {0, direction},
-        {1, direction},
-        {-1, direction},
-        {0, 0} // placeholder
-    };
+    std::pair<int, int> offsets[4];
+    std::copy(std::begin(INITIAL_OFFSETS), std::end(INITIAL_OFFSETS), std::begin(offsets));
+    for (auto& offset : offsets) {
+        offset.second *= direction;
+    }
 
     if (first_move) {
         offsets[0] = {0, 2 * direction};
-        offsets[3] = {0, 1 * direction};
+        offsets[3] = {0, direction};
     }
 
     for (const auto& offset : offsets) {
         int newX = pos_copy.row + offset.first;
         int newY = pos_copy.col + offset.second;
 
-        if (validate_move(newX, newY) || move_handler.is_there_obstruction(Position{static_cast<char>(newX), newY})) {
-            moves.push_back(Position{static_cast<char>(newX), newY});
+        if (validate_in_bounds(newX, newY)) {
+            if (offset.first != 0) {
+                moves[DIAGONAL].push(Position{static_cast<char>(newX), newY});
+            } else {
+                moves[STRAIGHT].push(Position{static_cast<char>(newX), newY});
+            }
         }
     }
 

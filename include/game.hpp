@@ -6,7 +6,7 @@
 #include <SFML/System/Sleep.hpp>
 
 #include "move_handler.hpp"
-#include "state_manager.hpp"
+#include "hitbox_manager.hpp"
 #include "board.hpp"
 
 #include "pieces/pawn.hpp"
@@ -29,7 +29,7 @@ private:
 
     sf::RenderWindow window;
     Board game_board;
-    State_Manager board_hitbox_state;
+    // Hitbox_Manager board_hitbox_state;
     Move_Handler move_handler;
 
     const float FRAME_RATE = 1.0f / 30.0f;

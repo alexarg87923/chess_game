@@ -9,10 +9,13 @@
 
 class Queen : public Rook, public Bishop {
 public:
-    Queen(char row, int col, Color team_color, sf::Vector2f size, Move_Handler& handler);
-    Queen(const Position& pos, Color team_color, sf::Vector2f size, Move_Handler& handler);
+    Queen();
+    ~Queen();
 
-    std::vector<Position> get_moves(const Position& pos, bool get_every_move = false) const override;
+    Queen(char row, int col, Color team_color, sf::Vector2f size);
+    Queen(const Position& pos, Color team_color, sf::Vector2f size);
+
+    std::map<int, std::queue<Position>> calc_moves(const Position& pos) const override;
 };
 
 #endif

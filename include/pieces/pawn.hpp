@@ -8,10 +8,13 @@
 
 class Pawn : public Piece {
 public:
-    Pawn(char row, int col, Color team_color, sf::Vector2f size, Move_Handler& handler);
-    Pawn(const Position& pos, Color team_color, sf::Vector2f size, Move_Handler& handler);
+    Pawn();
+    ~Pawn();
 
-    std::vector<Position> get_moves(const Position& pos, bool get_every_move = false) const override;
+    Pawn(char row, int col, Color team_color, sf::Vector2f size);
+    Pawn(const Position& pos, Color team_color, sf::Vector2f size);
+
+    std::map<int, std::queue<Position>> calc_moves(const Position& pos) const override;
 
 private:
     bool first_move = true;

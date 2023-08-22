@@ -2,25 +2,23 @@
 
 #include "board.hpp"
 #include "chess_ai.hpp"
-#include "state_manager.hpp"
+#include "hitbox_manager.hpp"
 
 class Piece;
 
 class Move_Handler {
 public:
-    Move_Handler(Board& incoming_game_board, State_Manager& incoming_state_manager);
+    Move_Handler(Board& incoming_game_board);
 
     void move_piece(std::__1::shared_ptr<Piece> piece, Position pos);
     void place_piece(std::__1::shared_ptr<Piece> piece);
     void update_piece(std::shared_ptr<Piece> piece);
-
-    bool is_there_obstruction(Position pos);
 private:
     Board& game_board;
-    State_Manager& state_manager;
 
+    Hitbox_Manager hitbox_manager;
     std::map<Position, std::vector<std::shared_ptr<Piece>>> obstruction_manager;
 
-    std::vector<std::shared_ptr<Piece>> check_for_obstructions(std::shared_ptr<Piece> piece);
+    std::pair<std::vector<Position>, std::vector<std::shared_ptr<Piece>>> check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::map<int, std::queue<Position>> moves);
     // void reset_parents_at(const Position pos);
 };

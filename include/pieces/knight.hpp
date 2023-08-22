@@ -8,10 +8,13 @@
 
 class Knight : public Piece {
 public:
-    Knight(char row, int col, Color team_color, sf::Vector2f size, Move_Handler& handler);
-    Knight(const Position &pos, Color team_color, sf::Vector2f size, Move_Handler& handler);
+    Knight();
+    ~Knight();
 
-    std::vector<Position> get_moves(const Position& pos, bool get_every_move = false) const override;
+    Knight(char row, int col, Color team_color, sf::Vector2f size);
+    Knight(const Position &pos, Color team_color, sf::Vector2f size);
+
+    std::map<int, std::queue<Position>> calc_moves(const Position& pos) const override;
 };
 
 #endif

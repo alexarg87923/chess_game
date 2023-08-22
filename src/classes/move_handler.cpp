@@ -2,79 +2,108 @@
 
 #include "piece.hpp"
 
-Move_Handler::Move_Handler(Board& incoming_game_board, State_Manager& incoming_state_manager) :
-    game_board(incoming_game_board),
-    state_manager(incoming_state_manager)
+Move_Handler::Move_Handler(Board& incoming_game_board) :
+    game_board(incoming_game_board), hitbox_manager(game_board)
 {}
 
 void Move_Handler::move_piece(std::shared_ptr<Piece> piece, Position pos) {
 
-    if (obstruction_manager.find(piece->get_pos()) != obstruction_manager.end()) {
-        auto& obstructed_pieces = obstruction_manager[piece->get_pos()];
-        for (const auto& obstructed_piece : obstructed_pieces) {
-            // Update each obstructed piece
-            update_piece(obstructed_piece);
+    auto position = piece->get_pos();
+
+    auto hitboxes = hitbox_manager.check_hitbox(position);
+
+    if(!hitboxes.empty()) {
+        for (const auto & hitbox : hitboxes) {
+            auto parent = hitbox->get_parent();
+            parent->invalidate_moves();
+            update_piece(parent);
+            place_piece(parent);
         }
-        // Remove this piece from the obstruction manager
-        obstruction_manager.erase(piece->get_pos());
     }
 
-    game_board.set_piece(piece->get_pos()); // clear the old position of the piece
+    if (obstruction_manager.find(position) != obstruction_manager.end()) {
+        auto& obstructed_pieces = obstruction_manager[position];
+        for (const auto& obstructed_piece : obstructed_pieces) {
+            // Update each obstructing piece
+            update_piece(obstructed_piece);
+            place_piece(obstructed_piece);
+        }
+        // Remove this piece from the obstruction manager
+        obstruction_manager.erase(position);
+    }
+
+    game_board.set_piece(position); // clear the old position of the piece
 
     piece->set_piece_pos(pos); // set the configuratoin of the piece
+    piece->invalidate_moves();
 
-    update_piece(piece); // update the configuration of the piece
+    update_piece(piece);
 
     place_piece(piece); // place the piece on the state manager
-}
-
-bool Move_Handler::is_there_obstruction(Position pos) {
-    return game_board.get_piece(pos).has_value();
 }
 
 void Move_Handler::update_piece(std::shared_ptr<Piece> piece) {
     Piece& p = *piece;
 
-    p.clear_valid_moves();
-    state_manager.remove_hitboxes_from_state(piece);
+    hitbox_manager.remove_hitboxes_from_state(piece);
     p.clear_hitboxes();
-    p.set_valid_moves(p.get_moves(p.get_pos()));
 }
 
 void Move_Handler::place_piece(const std::shared_ptr<Piece> piece) {
     Piece& p = *piece;
+    auto pos = piece->get_pos();
+    
+    // Calculate or get cached moves
+    std::map<int, std::queue<Position>> moves;
+    if (!p.moves_are_valid()) {
+        moves = piece->calc_moves(pos);
+        p.cache_moves(moves);
+    } else {
+        moves = p.get_moves();
+    }
 
     game_board.set_piece(piece);
 
-    state_manager.add_moves_to_state(piece);
+    auto hitboxes = hitbox_manager.check_hitbox(pos);
 
-    auto newly_obstructed_pieces = check_for_obstructions(piece);
-    if (!newly_obstructed_pieces.empty()) {
-        obstruction_manager[piece->get_pos()] = newly_obstructed_pieces;
+    if(!hitboxes.empty()) {
+        for (const auto & hitbox : hitboxes) {
+            auto parent = hitbox->get_parent();
+            parent->invalidate_moves();
+            update_piece(parent);
+            place_piece(parent);
+        }
     }
+
+    auto pair = check_for_obstructions_and_valid_moves(piece, moves);
+    if (!pair.second.empty()) {
+        obstruction_manager[pos] = pair.second;
+    }
+
+    hitbox_manager.add_moves_to_state(piece, pair.first);
 }
 
-std::vector<std::shared_ptr<Piece>> Move_Handler::check_for_obstructions(std::shared_ptr<Piece> piece) {
-    std::vector<std::shared_ptr<Piece>> obstructedPieces;
+std::pair<std::vector<Position>, std::vector<std::shared_ptr<Piece>>> Move_Handler::check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::map<int, std::queue<Position>> moves) {
+    std::vector<std::shared_ptr<Piece>> obstructing_pieces;
+    std::vector<Position> valid_moves;
 
-    // Here, you'll need to implement the logic to check for pieces that are obstructed 
-    // by the piece passed as an argument. This might involve scanning the board in 
-    // each direction from the piece's position until you hit another piece or the 
-    // edge of the board.
+    for (auto & pair : moves) {
+        while (!pair.second.empty()) {
+            Position nextPos = pair.second.front();
+            auto pieceOpt = game_board.get_piece(nextPos);
+            if (pieceOpt.has_value()) {
+                auto piece = pieceOpt.value();
+                if (piece->get_team() != inc_piece->get_team()) {
+                    valid_moves.push_back(nextPos);
+                }
+                obstructing_pieces.emplace_back(piece);
+                break; // stop checking further in this direction as there's an obstruction
+            } else {
+                valid_moves.push_back(nextPos);
+            }
+            pair.second.pop(); // move to the next position in this direction
+        }
+    }
 
-    return obstructedPieces;
+    return {valid_moves, obstructing_pieces};
 }
-
-// void Move_Handler::reset_parents_at(const Position pos) {
-//     auto hitboxes = state_manager.check_hitbox(pos);
-
-//     if(!hitboxes.empty()) {
-//         for (const auto & hitbox : hitboxes) {
-//             auto parent = hitbox->get_parent();
-
-//             state_manager.remove_hitboxes_from_state(parent);
-//             update_piece(parent);
-//             state_manager.add_moves_to_state(parent);
-//         }
-//     }
-// }

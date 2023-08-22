@@ -8,15 +8,13 @@
 
 class King : public Piece {
 public:
-    King(char row, int col, Color team_color, sf::Vector2f size, Move_Handler& handler);
-    King(const Position& pos, Color team_color, sf::Vector2f size, Move_Handler& handler);
+    King();
+    ~King();
 
-    // bool is_in_check() const;
+    King(char row, int col, Color team_color, sf::Vector2f size);
+    King(const Position& pos, Color team_color, sf::Vector2f size);
 
-    bool validate_move(char row, int col) const override;
-    bool validate_move(const Position &pos) const override;
-
-    std::vector<Position> get_moves(const Position& pos, bool get_every_move = false) const override;
+    std::map<int, std::queue<Position>> calc_moves(const Position& pos) const override;
 
 private:
     bool already_moved = false;
