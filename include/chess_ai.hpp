@@ -4,14 +4,12 @@
 #include <map>
 
 #include "constant.hpp"
-#include "state_manager.hpp"
 #include "types.hpp"
+#include "move_handler.hpp"
 
 class Chess_AI {
 public:
-    Chess_AI();
-    ~Chess_AI();
-    bool will_this_move_stop_check(const State_Manager *board, const Position& pos) const;
+    bool will_this_move_stop_check() const;
 };
 
 #endif

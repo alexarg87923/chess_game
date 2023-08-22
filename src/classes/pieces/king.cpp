@@ -1,12 +1,9 @@
 #include "pieces/king.hpp"
 
-#include "game.hpp"
-#include "board.hpp"
-
-King::King(){}
-King::~King(){}
-King::King(const Position& pos, Color team_color, sf::Vector2f size) : King(pos.row, pos.col, team_color, size) {}
-King::King(char row, int col, Color team_color, sf::Vector2f size) : Piece(row, col, team_color, "king", size) {}
+King::King(const Position& pos, Color team_color, sf::Vector2f size, Move_Handler& handler) : King(pos.row, pos.col, team_color, size, handler) {}
+King::King(char row, int col, Color team_color, sf::Vector2f size, Move_Handler& handler) : Piece(row, col, team_color, "king", size, handler) {
+    valid_moves = get_moves(piece_position);
+}
 
 std::vector<Position> King::get_moves(const Position& pos) const {
     const int RANGE_START = -1;
@@ -25,6 +22,7 @@ std::vector<Position> King::get_moves(const Position& pos) const {
             }
         }
     }
+
     return moves;
 }
 
@@ -38,14 +36,6 @@ bool King::validate_move(char row, int col) const {
     // }
 
     return valid_move && safe_square;
-}
-
-void King::update_position(const Position& pos) {
-    if (!already_moved) {
-        already_moved = true;
-    }
-
-    Piece::update_position(pos);
 }
 
 // bool King::is_in_check() const {

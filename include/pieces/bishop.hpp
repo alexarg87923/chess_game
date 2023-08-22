@@ -6,15 +6,10 @@
 
 #include "piece.hpp"
 
-class Board;
-
 class Bishop : virtual public Piece {
 public:
-    Bishop();
-    ~Bishop();
-
-    Bishop(char row, int col, Color team_color, sf::Vector2f size);
-    Bishop(const Position& pos, Color team_color, sf::Vector2f size);
+    Bishop(char row, int col, Color team_color, sf::Vector2f size, Move_Handler& handler);
+    Bishop(const Position& pos, Color team_color, sf::Vector2f size, Move_Handler& handler);
 
 protected:
     virtual std::vector<Position> get_moves(const Position& pos) const override;

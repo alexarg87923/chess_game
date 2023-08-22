@@ -2,18 +2,22 @@
 
 #include "piece.hpp"
 
-Game::Game() : window(new sf::RenderWindow(sf::VideoMode(2560, 1606), "Chesst Game")), game_board(new Board(window->getSize())), board_hitbox_state(new State_Manager(game_board)) {}
-Game::~Game() {}
+Game::Game() : 
+    window(sf::RenderWindow(sf::VideoMode(2560, 1606), "Chesst Game")),
+    game_board(Board(window.getSize())),
+    board_hitbox_state(State_Manager(game_board)),
+    move_handler(game_board, board_hitbox_state)
+{}
 
 void Game::start() {
     std::cout << "Starting game...\n";
 
-    game_board->add_grid();
+    game_board.add_grid();
 
     initialize_pieces();
 
     // GAME LOOP
-    while (window->isOpen()) {
+    while (window.isOpen()) {
         // handle slowing down of frameRate
         handle_frame_rate(FRAME_RATE, clock);
 
@@ -25,21 +29,25 @@ void Game::start() {
     }
 }
 
-void Game::initialize_pieces() const {
-    auto size_of_grid_square = game_board->get_size_of_grid_square();
-    
-    game_board->set_piece(new Pawn('A', 1, WHITE, size_of_grid_square));
+void Game::initialize_pieces() {
+    auto size_of_grid_square = game_board.get_size_of_grid_square();
 
-    game_board->set_piece(new Pawn('B', 8, BLACK, size_of_grid_square));
-    game_board->set_piece(new Pawn('C', 8, BLACK, size_of_grid_square));
+    auto white_king = std::make_shared<King>('E', 1, WHITE, size_of_grid_square, move_handler);
+    move_handler.place_piece(white_king);
+    game_board.set_king(white_king);
 
-    game_board->set_piece(new Queen('E', 4, BLACK, size_of_grid_square));
-    game_board->set_piece(new Bishop('B', 5, BLACK, size_of_grid_square));
 
-    game_board->set_piece(new Bishop('C', 1, WHITE, size_of_grid_square));
-    game_board->set_piece(new Rook('H', 1, WHITE, size_of_grid_square));
-    game_board->set_piece(new Knight('G', 1, WHITE, size_of_grid_square));
-    game_board->set_piece(new King('E', 1, WHITE, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Pawn>('A', 1, WHITE, size_of_grid_square, move_handler));
+
+    move_handler.place_piece(std::make_shared<Pawn>('B', 8, BLACK, size_of_grid_square, move_handler));
+    move_handler.place_piece(std::make_shared<Pawn>('C', 8, BLACK, size_of_grid_square, move_handler));
+
+    move_handler.place_piece(std::make_shared<Queen>('E', 4, BLACK, size_of_grid_square, move_handler));
+    move_handler.place_piece(std::make_shared<Bishop>('B', 5, BLACK, size_of_grid_square, move_handler));
+
+    move_handler.place_piece(std::make_shared<Bishop>('C', 1, WHITE, size_of_grid_square, move_handler));
+    move_handler.place_piece(std::make_shared<Rook>('H', 1, WHITE, size_of_grid_square, move_handler));
+    move_handler.place_piece(std::make_shared<Knight>('G', 1, WHITE, size_of_grid_square, move_handler));
 }
 
 void Game::handle_frame_rate(const float& FRAME_RATE, sf::Clock& clock) {
@@ -51,7 +59,7 @@ void Game::handle_frame_rate(const float& FRAME_RATE, sf::Clock& clock) {
 }
 
 void Game::handle_events() {
-    while (window->pollEvent(event)) {
+    while (window.pollEvent(event)) {
 
     // Checks to see if window is closed
     check_close(event);
@@ -62,16 +70,16 @@ void Game::handle_events() {
     }
 }
 
-void Game::check_close(const sf::Event& event) const {
+void Game::check_close(const sf::Event& event) {
     if (event.type == sf::Event::Closed) {
-        window->close();
+        window.close();
     }
 }
 
-void Game::listen_left_click(const sf::Event& event) const{
+void Game::listen_left_click(const sf::Event& event) {
     if (event.type == sf::Event::MouseButtonPressed) {
         if (event.mouseButton.button == sf::Mouse::Left) {
-            bool moved = check_move();
+            bool moved = handle_move();
 
             if (!moved) {
                 check_select();
@@ -80,32 +88,30 @@ void Game::listen_left_click(const sf::Event& event) const{
     }
 }
 
-void Game::check_select() const {
-    if (!(game_board->get_selected_piece())) {
-        auto result = game_board->check_clicked_piece(sf::Mouse::getPosition(*window));
+void Game::check_select() {
+    if (!(game_board.get_selected_piece())) {
+        auto result = game_board.check_clicked_piece(sf::Mouse::getPosition(window));
         if (result.has_value()) {
-            game_board->select_piece(result.value());
+            game_board.select_piece(result.value());
         }
     } else {
-        game_board->select_piece(nullptr);
+        game_board.select_piece(nullptr);
     }
 
-    game_board->make_hitboxes();
+    game_board.make_hitboxes();
 }
 
-bool Game::check_move() const {
-    Piece* selected_piece = game_board->get_selected_piece();
+bool Game::handle_move() {
+    auto selected_piece = game_board.get_selected_piece();
     if (selected_piece) {
-        auto result = game_board->check_clicked_hitbox(sf::Mouse::getPosition(*window));
+        auto result = game_board.check_clicked_hitbox(sf::Mouse::getPosition(window));
 
         if (result.has_value()) {
-            selected_piece->update_position(result.value());
+            move_handler.move_piece(selected_piece, result.value());
 
-            board_hitbox_state->refresh_hitbox_state(selected_piece);
+            game_board.clear_hitboxes();
 
-            game_board->select_piece(nullptr);
-            game_board->clear_hitboxes();
-
+            game_board.select_piece(nullptr);
             return 1;
         }
     }
@@ -113,20 +119,20 @@ bool Game::check_move() const {
     return 0;
 }
 
-void Game::handle_drawing() const {
-    window->clear();
+void Game::handle_drawing() {
+    window.clear();
 
     // draws the game board
-    window->draw(*game_board->get_board());
+    game_board.draw_board(window);
 
     // draws the grid pieces
-    game_board->draw_grid(*window);
+    game_board.draw_grid(window);
 
     // draws every piece on the board (i.e dead pieces arent drawn)
-    game_board->draw_piece(*window);
+    game_board.draw_piece(window);
 
     // draws any hitbox in the hitboxes array (empty default)
-    game_board->draw_hitboxes(*window);
+    game_board.draw_hitboxes(window);
 
-    window->display();
+    window.display();
 }

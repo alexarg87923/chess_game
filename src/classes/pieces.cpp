@@ -1,74 +1,72 @@
 #include "piece.hpp"
 
-#include "board.hpp"
-#include "pieces/king.hpp"
-#include "game.hpp"
 #include "hitbox.hpp"
 
-Piece::Piece(char row, int col, Color team_color, const std::string& name, sf::Vector2f size) : Piece(Position{row, col}, team_color, "pawn", size) {}
-Piece::Piece(const Position& pos, Color team_color, const std::string& name, sf::Vector2f size) {
-    save_piece(new sf::RectangleShape(size));
+Piece::Piece(Move_Handler& handler) :
+    move_handler(handler)
+{}
+
+Piece::Piece(char row, int col, Color team_color, const std::string& name, sf::Vector2f size, Move_Handler& handler) :
+    Piece(Position{row, col}, team_color, name, size, handler)
+{}
+
+Piece::Piece(const Position& pos, Color team_color, const std::string& name, sf::Vector2f size, Move_Handler& handler) :
+    move_handler(handler) 
+{
+    piece_rect_obj = std::make_unique<sf::RectangleShape>(size);
+    piece_rect_obj->setTexture(load_sprite(name, team_color));
+
+    piece_name = name;
 
     team = team_color;
-    piece->setTexture(load_sprite(name, team_color));
-    set_position(pos);
 
-    // calc_valid_moves();
+    piece_position = pos;
+}
+
+bool Piece::operator==(const Piece& other) const {
+    // Comparing Color enum values directly
+    if (team != other.team) return false;
+
+    // Comparing the names
+    if (piece_name != other.piece_name) return false;
+
+    // Comparing Position objects
+    if (piece_position != other.piece_position) return false;
+
+    // All checks passed, the objects are equal
+    return true;
 }
 
 void Piece::draw(sf::RenderTarget& target) const {
-    target.draw(*piece);
+    target.draw(*piece_rect_obj);
 }
 
 std::vector<Position> Piece::get_valid_moves() const {
     return valid_moves;
 }
 
-void Piece::save_piece(sf::RectangleShape *tmp) {
-    piece = tmp;
+void Piece::set_valid_moves(std::vector<Position> incoming_valid_moves) {
+    valid_moves = incoming_valid_moves;
+}
+
+void Piece::clear_valid_moves() {
+    valid_moves.clear();
 }
 
 Position Piece::get_pos() const {
     return piece_position;
 }
 
-sf::RectangleShape *Piece::get_piece() const {
-    return piece;
+sf::RectangleShape* Piece::get_piece() const {
+    return piece_rect_obj.get();
 }
 
-void Piece::update_position(const Position& pos) {
-    set_position(pos);
+void Piece::set_position(sf::Vector2f pos) {
+    piece_rect_obj->setPosition(pos);
 }
 
-void Piece::set_position(const Position &pos) {
-    // if(piece_position.row) {
-    //     Board::set_piece(piece_position);
-    // }
-
-    // auto curr_state = Game::get_hitbox_states();
-
-    // auto hitboxes_at_old_pos = curr_state->check_hitbox(piece_position);
-
+void Piece::set_piece_pos(Position pos) {
     piece_position = pos;
-    // Board::set_piece(piece_position, this);
-    // piece->setPosition(Board::pair_to_pos(piece_position));
-
-    // auto hitboxes_at_new_pos = curr_state->check_hitbox(piece_position);
-
-    // hitboxes_at_new_pos.insert(hitboxes_at_new_pos.end(), hitboxes_at_old_pos.begin(), hitboxes_at_old_pos.end());
-
-    // refresh_affected_pieces(hitboxes_at_new_pos);
-}
-
-void Piece::refresh_affected_pieces(const std::vector<Hitbox*>& affected_hitboxes) {
-    // if (affected_hitboxes.empty()) return;
-
-    // auto curr_state = Game::get_hitbox_states();
-
-    // for (const auto& hitbox : affected_hitboxes) {
-    //     curr_state->refresh_hitbox_state(hitbox->get_parent());
-    // }
-    return;
 }
 
 
@@ -81,55 +79,17 @@ bool Piece::validate_move(char row, int col) const {
     }
 }
 
-std::string Piece::get_working_dir() const {
-    char buffer[FILENAME_MAX];
-    if (getcwd(buffer, sizeof(buffer)) != nullptr) {
-        return std::string(buffer);
-    } else {
-        std::cerr << "Failed to get the current working directory." << std::endl;
-        return "";
-    }
-}
-
 sf::Texture* Piece::load_sprite(const std::string& name, Color team_color) const {
     sf::Texture* sprite = new sf::Texture();
     sprite->loadFromFile(get_working_dir() + "/src/assets/images/" + name + '_' + std::to_string(static_cast<int>(team_color)) + ".png");
     return sprite;
 }
 
-bool Piece::is_king_in_check() const{
-    // King* king = dynamic_cast<King*>(Board::get_piece_from_map(team, "king"));
-    // if(king != nullptr) {
-    //     return king->is_in_check();
-    // }
-    // return false;
-    return false;
-}
-
-void Piece::calc_valid_moves() {
-    valid_moves.clear();
-
-    valid_moves = get_moves(piece_position);
-
-    // Game::get_hitbox_states()->add_moves_to_state(this);
-}
-
 Color Piece::get_team() const {
     return team;
 }
 
-bool Piece::is_this_move_going_to_stop_check(const Position& move) const {
-    // return false;
-    // if(!is_king_in_check())
-    //     return false;
-
-    // Chess_AI game_simulation;
-
-    // return game_simulation.will_this_move_stop_check(Game::get_hitbox_states(), move);
-    return false;
-}
-
-std::vector<Hitbox*> Piece::get_hitboxes() const {
+std::vector<std::shared_ptr<Hitbox>> Piece::get_hitboxes() const {
     return hitboxes;
 }
 
@@ -137,8 +97,12 @@ void Piece::clear_hitboxes() {
     hitboxes.clear();
 }
 
-void Piece::add_hitbox(Hitbox *hitbox) {
+void Piece::add_hitbox(std::shared_ptr<Hitbox> hitbox) {
     hitboxes.push_back(hitbox);
+}
+
+void Piece::add_valid_move(Position pos) {
+    valid_moves.push_back(pos);
 }
 
 

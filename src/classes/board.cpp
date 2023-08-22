@@ -2,11 +2,12 @@
 
 #include "piece.hpp"
 
-Board::~Board() {}
-Board::Board() {}
-
-Board::Board(sf::Vector2u window_size) : king_white(nullptr), king_black(nullptr), selected_piece(nullptr) {
-    sf::RectangleShape* board_asset = new sf::RectangleShape;
+Board::Board(sf::Vector2u window_size) : 
+    king_white(nullptr), king_black(nullptr), selected_piece(nullptr),
+    MAP_OF_GRID(std::make_unique<std::map<Position, std::shared_ptr<sf::RectangleShape>>>()), PIECES(std::make_unique<std::map<Position, std::shared_ptr<Piece>>>()),
+    HITBOXES(), board(nullptr)
+{
+    auto board_asset = std::make_unique<sf::RectangleShape>();
     sf::Vector2f shape_size = sf::Vector2f(1000, 1000);
     sf::Vector2f half_of_shape = sf::Vector2f(shape_size.x/2, shape_size.y/2);
 
@@ -14,7 +15,7 @@ Board::Board(sf::Vector2u window_size) : king_white(nullptr), king_black(nullptr
     board_asset->setFillColor(sf::Color::White);
     board_asset->setPosition((window_size.x/2) - half_of_shape.x, (window_size.y/2) - half_of_shape.y);
 
-    set_board(board_asset);
+    board = std::move(board_asset);
 }
 
 void Board::add_grid() {
@@ -29,8 +30,9 @@ void Board::add_grid() {
     for (int row = 0; row < BOARD_ROW; row++) {
         for (int col = 0; col < BOARD_COL; col++) {
             // A grid piece is made and positioned on its given position on the board
-            sf::RectangleShape* grid_piece = new sf::RectangleShape(size);
+            auto grid_piece = std::make_shared<sf::RectangleShape>(size);
             sf::Vector2f new_position = sf::Vector2f((row * size.x) + board_pos.x, (col * size.y) + board_pos.y);
+
             grid_piece->setFillColor(((row + col) % 2 == 0) ? sf::Color::White : sf::Color::Red);
             grid_piece->setPosition(new_position);
 
@@ -38,7 +40,7 @@ void Board::add_grid() {
             char character_offset = ('A' + row);
             Position key = {character_offset, (BOARD_COL - col)};
 
-            set_map_of_grid_square(key, *grid_piece);
+            set_map_of_grid_square(key, grid_piece);
         }
     }
 }
@@ -49,11 +51,11 @@ void Board::draw_grid(sf::RenderWindow &window) {
     }
 }
 
-Piece* Board::get_king(Color team) {
+std::shared_ptr<Piece> Board::get_king(Color team) {
     return (team == WHITE) ? king_white : king_black;
 }
 
-void Board::set_king(Piece* incoming_king) {
+void Board::set_king(std::shared_ptr<Piece> incoming_king) {
     if(incoming_king->get_team() == WHITE) {
         king_white = incoming_king;
     } else {
@@ -61,7 +63,7 @@ void Board::set_king(Piece* incoming_king) {
     }
 }
 
-std::optional<Piece*> Board::check_clicked_piece(sf::Vector2i mouse_pos) {
+std::optional<std::shared_ptr<Piece>> Board::check_clicked_piece(sf::Vector2i mouse_pos) {
     for (auto pair : *PIECES) {
         if(pair.second->get_piece()->getGlobalBounds().contains(mouse_pos.x, mouse_pos.y)) {
             return pair.second;
@@ -70,20 +72,16 @@ std::optional<Piece*> Board::check_clicked_piece(sf::Vector2i mouse_pos) {
     return std::nullopt;
 }
 
-void Board::select_piece(Piece* piece) {
+void Board::select_piece(std::shared_ptr<Piece> piece) {
     selected_piece = piece;
 }
 
-Piece* Board::get_selected_piece() {
+std::shared_ptr<Piece> Board::get_selected_piece() {
     return selected_piece;
 }
 
-sf::RectangleShape* Board::get_board() {
-    return board;
-}
-
-void Board::set_board(sf::RectangleShape* incoming_board) {
-    board = incoming_board;
+void Board::draw_board(sf::RenderWindow& window) {
+    window.draw(*board);
 }
 
 void Board::set_size_of_grid_square(sf::Vector2f tmp) {
@@ -94,15 +92,15 @@ sf::Vector2f Board::get_size_of_grid_square() {
     return GRID_SQUARE_SIZE;
 }
 
-sf::RectangleShape* Board::get_grid_square_from_map(char row, int col) {
+std::shared_ptr<sf::RectangleShape> Board::get_grid_square_from_map(char row, int col) {
     return (*MAP_OF_GRID)[Position{row, col}];
 }
 
-void Board::set_map_of_grid_square(Position key, sf::RectangleShape val) {
-
+void Board::set_map_of_grid_square(Position key, std::shared_ptr<sf::RectangleShape> val) {
+    (*MAP_OF_GRID)[key] = val;
 }
 
-std::optional<Piece*> Board::get_piece(char row, int col) {
+std::optional<std::shared_ptr<Piece>> Board::get_piece(char row, int col) {
     auto iter = PIECES->find({row, col});
     if (iter != PIECES->end()) {
         return iter->second;
@@ -116,7 +114,7 @@ bool Board::check_piece(char row, int col) {
     return (it != PIECES->end()) ? true : false;
 }
 
-std::optional<Piece*> Board::get_piece(Position key) {
+std::optional<std::shared_ptr<Piece>> Board::get_piece(Position key) {
     auto iter = PIECES->find(key);
     if (iter != PIECES->end()) {
         return iter->second;
@@ -125,13 +123,16 @@ std::optional<Piece*> Board::get_piece(Position key) {
     }
 }
 
-void Board::set_piece(Position key, Piece *val) {
+void Board::set_piece(Position key, std::shared_ptr<Piece> val) {
     if (val == nullptr) {
         PIECES->erase(key);
     } else if (key == Position{}) {
-        (*PIECES)[val->get_pos()] = val;
+        auto position = val->get_pos();
+        (*PIECES)[position] = val;
+        val->set_position((*MAP_OF_GRID)[position]->getPosition());
     } else {
         (*PIECES)[key] = val;
+         val->set_position((*MAP_OF_GRID)[key]->getPosition());
     }
 }
 
@@ -145,7 +146,7 @@ void Board::draw_piece(sf::RenderWindow &window) {
 
 std::optional<Position> Board::check_clicked_hitbox(sf::Vector2i mouse_pos) {
     for (auto each : HITBOXES) {
-        if(each->get_hitbox().getGlobalBounds().contains(mouse_pos.x, mouse_pos.y)) {
+        if(each->get_hitbox()->getGlobalBounds().contains(mouse_pos.x, mouse_pos.y)) {
             return each->get_position();
         }
     }
@@ -171,7 +172,7 @@ void Board::draw_hitboxes(sf::RenderWindow &window) const {
     }
 
     for (auto each : HITBOXES) {
-        window.draw(each->get_hitbox());
+        window.draw(*each->get_hitbox());
     }
 }
 
@@ -182,15 +183,15 @@ void Board::draw_hitboxes(sf::RenderWindow &window) const {
 */
 
 
-void Board::set_piece(char row, int col, Piece* piece_to_save) {
+void Board::set_piece(char row, int col, std::shared_ptr<Piece> piece_to_save) {
     set_piece({row, col}, piece_to_save);
 }
 
-void Board::set_piece(Piece* piece_to_save) {
+void Board::set_piece(std::shared_ptr<Piece> piece_to_save) {
     set_piece({}, piece_to_save);
 }
 
-sf::RectangleShape* Board::get_grid_square_from_map(Position key) {
+std::shared_ptr<sf::RectangleShape> Board::get_grid_square_from_map(Position key) {
     return get_grid_square_from_map(key.row, key.col);
 }
 

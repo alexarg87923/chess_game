@@ -5,6 +5,7 @@
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Sleep.hpp>
 
+#include "move_handler.hpp"
 #include "state_manager.hpp"
 #include "board.hpp"
 
@@ -20,29 +21,29 @@ class Piece;
 class Game {
 public:
     Game();
-    ~Game();
     void start();
 
 private:
     sf::Event event;
     sf::Clock clock;
 
-    sf::RenderWindow* window;
-    Board* game_board;
-    State_Manager* board_hitbox_state;
+    sf::RenderWindow window;
+    Board game_board;
+    State_Manager board_hitbox_state;
+    Move_Handler move_handler;
 
     const float FRAME_RATE = 1.0f / 30.0f;
 
     void handle_events();
     void handle_frame_rate(const float& frameRate, sf::Clock& clock);
 
-    void initialize_pieces() const;
-    void listen_left_click(const sf::Event& event) const;
-    void handle_drawing() const;
+    void initialize_pieces();
+    void listen_left_click(const sf::Event& event);
+    void handle_drawing();
 
-    void check_close(const sf::Event& event) const;
-    void check_select() const;
-    bool check_move() const;
+    void check_close(const sf::Event& event);
+    void check_select();
+    bool handle_move();
 };
 
 #endif

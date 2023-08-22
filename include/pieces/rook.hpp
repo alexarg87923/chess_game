@@ -8,11 +8,9 @@
 
 class Rook : virtual public Piece {
 public:
-    Rook();
-    ~Rook();
+    Rook(char row, int col, Color team_color, sf::Vector2f size, Move_Handler& handler);
+    Rook(const Position& pos, Color team_color, sf::Vector2f size, Move_Handler& handler);
 
-    Rook(char row, int col, Color team_color, sf::Vector2f size);
-    Rook(const Position& pos, Color team_color, sf::Vector2f size);
 protected:
     virtual std::vector<Position> get_moves(const Position& pos) const override;
 };

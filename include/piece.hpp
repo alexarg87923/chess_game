@@ -7,57 +7,53 @@
 #include <SFML/System/String.hpp>
 
 #include <vector>
-#include <string.h>
-#include <unistd.h>
-#include <iostream>
 
 #include "types.hpp"
 #include "chess_ai.hpp"
-
-class King;
+#include "helper.hpp"
+#include "move_handler.hpp"
 
 class Piece {
 public:
-    Piece(){};
+    Piece(Move_Handler& handler);
     ~Piece(){};
-    Piece(char row, int col, Color team_color, const std::string& name, sf::Vector2f size);
-    Piece(const Position& pos, Color team_color, const std::string& name, sf::Vector2f size);
+
+    Piece(char row, int col, Color team_color, const std::string& name, sf::Vector2f size, Move_Handler& handler);
+    Piece(const Position& pos, Color team_color, const std::string& name, sf::Vector2f size,  Move_Handler& handler);
 
     Position get_pos() const;
     void draw(sf::RenderTarget& target) const;
     std::vector<Position> get_valid_moves() const;
     sf::RectangleShape* get_piece() const;
     Color get_team() const;
-    std::vector<Hitbox*> get_hitboxes() const;
 
+    std::vector<std::shared_ptr<Hitbox>> get_hitboxes() const;
     void clear_hitboxes();
-    void add_hitbox(Hitbox *hitbox);
+    void add_hitbox(std::shared_ptr<Hitbox> hitbox);
+    void add_valid_move(Position pos);
 
-    virtual void update_position(const Position& pos);
-    virtual void calc_valid_moves();
     virtual std::vector<Position> get_moves(const Position& pos) const = 0;
 
+    bool operator==(const Piece& other) const;
+
+    void set_piece_pos(Position pos);
+    void set_position(sf::Vector2f pos);
+    void clear_valid_moves();
+    void set_valid_moves(std::vector<Position> incoming_valid_moves);
 protected:
-    sf::RectangleShape* piece;
+    std::unique_ptr<sf::RectangleShape> piece_rect_obj;
     std::vector<Position> valid_moves;
     Color team;
     Position piece_position;
-    std::vector<Hitbox*> hitboxes;
+    std::vector<std::shared_ptr<Hitbox>> hitboxes;
+    std::string piece_name;
 
-    virtual void save_piece(sf::RectangleShape *tmp);
+    Move_Handler& move_handler;
+
     virtual bool validate_move(char row, int col) const;
     virtual bool validate_move(const Position& pos) const;
 
     sf::Texture* load_sprite(const std::string& name, Color team_color) const;
-
-    bool is_king_in_check() const;
-
-    bool is_this_move_going_to_stop_check(const Position& pos) const;
-
-private:
-    void set_position(const Position &pos);
-    std::string get_working_dir() const;
-    void refresh_affected_pieces(const std::vector<Hitbox*>& pos);
 
 };
 

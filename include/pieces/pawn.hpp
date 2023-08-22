@@ -8,14 +8,10 @@
 
 class Pawn : public Piece {
 public:
-    Pawn();
-    ~Pawn();
-    Pawn(char row, int col, Color team_color, sf::Vector2f size);
-    Pawn(const Position& pos, Color team_color, sf::Vector2f size);
+    Pawn(char row, int col, Color team_color, sf::Vector2f size, Move_Handler& handler);
+    Pawn(const Position& pos, Color team_color, sf::Vector2f size, Move_Handler& handler);
 
     std::vector<Position> get_moves(const Position& pos) const override;
-
-    void update_position(const Position& pos) override;
 
 private:
     bool first_move = true;

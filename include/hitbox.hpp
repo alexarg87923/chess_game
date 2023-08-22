@@ -11,18 +11,17 @@ class Piece;
 
 class Hitbox {
 public:
-    Hitbox(sf::Vector2f incoming_size, const Position& incoming_pos, sf::Vector2f incoming_position, sf::Color incoming_color, Piece* incoming_parent);
-    ~Hitbox();
+    Hitbox(sf::Vector2f incoming_size, const Position& incoming_pos, sf::Vector2f incoming_position, sf::Color incoming_color, std::shared_ptr<Piece> incoming_parent);
 
-    Piece* get_parent() const;
-    sf::RectangleShape get_hitbox() const;
+    std::shared_ptr<Piece> get_parent() const;
+    sf::RectangleShape* get_hitbox() const;
     Position get_position() const;
 
-    bool operator==(const Hitbox& other) const;
-    bool operator==(const Hitbox* other) const;
+    bool operator==(const std::shared_ptr<Hitbox>& other) const;
+
 private:
-    Piece* parent;
-    sf::RectangleShape hitbox;
+    std::shared_ptr<Piece> parent;
+    std::unique_ptr<sf::RectangleShape> hitbox;
     Position position;
 };
 
