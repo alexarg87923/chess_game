@@ -16,25 +16,40 @@ void Pawn::calc_valid_moves() {
 
     if (name != "king" && is_king_in_check()) return;
 
-    auto pos = get_pos();
+    valid_moves = get_moves(position, false);
+}
+
+std::vector<Position> Pawn::get_moves(Position pos, bool get_every_move) {
+    std::vector<Position> moves;
 
     int direction = (team == 'w') ? 1 : -1;
 
+    std::pair<int, int> offsets[] = {{0, direction}, {1, direction}, {-1, direction}};
+    
     if (first_move) {
-        valid_moves.push_back(std::make_pair(pos.first, pos.second + (2 * direction)));
-        valid_moves.push_back(std::make_pair(pos.first, pos.second + direction));
-    } else {
-        valid_moves.push_back(std::make_pair(pos.first, pos.second + direction));
+        offsets[0] = {0, 2 * direction};
     }
 
-    if (Board::check_piece(pos.first + 1, pos.second + direction)) {
-        valid_moves.push_back(std::make_pair(pos.first + 1, pos.second + direction));
-    }
-    if (Board::check_piece(pos.first - 1, pos.second + direction)) {
-        valid_moves.push_back(std::make_pair(pos.first - 1, pos.second + direction));
+    for (const auto& offset : offsets) {
+        int newX = pos.first + offset.first;
+        int newY = pos.second + offset.second;
+        
+        // add conditions to push the moves only if the move is valid
+        // assuming that Board::check_piece(newX, newY) checks if a position is valid or not
+        if (offset.first == 0) { 
+            // pawn can move forward (directly in front) if no piece is there
+            if (!Board::check_piece(newX, newY)) {
+                moves.emplace_back(newX, newY);
+            }
+        } else {
+            // pawn can move diagonally forward only if there is a piece to capture
+            if (Board::check_piece(newX, newY)) {
+                moves.emplace_back(newX, newY);
+            }
+        }
     }
 
-    save_moves_globally(name);
+    return moves;
 }
 
 void Pawn::update_position(Position pos) {

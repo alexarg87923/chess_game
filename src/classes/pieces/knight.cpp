@@ -14,7 +14,13 @@ void Knight::calc_valid_moves() {
     
     if (name != "king" && is_king_in_check()) return;
 
+    valid_moves = get_moves(position, false);
+}
+
+std::vector<Position> Knight::get_moves(Position pos, bool get_every_move) {
     std::pair<int, int> offsets[] = {{1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}};
+
+    std::vector<Position> moves;
 
     for (const auto& offset : offsets) {
         int newX = position.first + offset.first;
@@ -22,8 +28,7 @@ void Knight::calc_valid_moves() {
 
         if (!validate_move(newX, newY)) continue;
 
-        valid_moves.emplace_back(newX, newY);
+        moves.emplace_back(newX, newY);
     }
-
-    save_moves_globally(name);
+    return moves;
 }

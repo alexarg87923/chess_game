@@ -15,6 +15,8 @@ public:
     Pawn(char row, int col, char team_color);
     Pawn(Position pos, char team_color);
 
+    std::vector<Position> get_moves(Position pos, bool get_every_move) override;
+
     void update_position(Position pos) override;
 
     void calc_valid_moves() override;

@@ -6,7 +6,7 @@ std::map<Position, Piece*> Board::PIECES;
 sf::Vector2f Board::MAP_OF_POSITIONS[BOARD_ROW][BOARD_COL];
 bool Board::CHECK_PIECE_FAST[BOARD_ROW][BOARD_COL];
 std::unordered_map<char, bool[BOARD_ROW][BOARD_COL]> Board::CHECK_HITBOX_FAST;
-TeamToPieceMap Board::PIECE_TO_HITBOX_MAPPING;
+// TeamToPieceMap Board::PIECE_TO_HITBOX_MAPPING;
 std::map<char, std::map<std::string, Piece*>> Board::MAP_OF_PIECES;
 
 Board::~Board() {}
@@ -140,7 +140,7 @@ sf::Vector2f Board::get_size_of_grid_square() {
 }
 
 sf::Vector2f Board::pair_to_pos(char row, int col) {
-    return MAP_OF_POSITIONS[row - 'A'][8 - col];
+    return MAP_OF_POSITIONS[row - 'A'][BOARD_COL - col];
 }
 
 sf::RectangleShape Board::get_grid_square_from_map(char row, int col) {
@@ -166,16 +166,16 @@ std::optional<Piece*> Board::get_piece(char row, int col) {
 
 
 bool Board::check_piece(char row, int col) {
-    return CHECK_PIECE_FAST[row - 'A'][8 - col];
+    return CHECK_PIECE_FAST[row - 'A'][BOARD_COL - col];
 }
 
 bool Board::check_hitbox(char team, char row, int col) {
-    return CHECK_HITBOX_FAST[team][row - 'A'][8 - col];
+    return CHECK_HITBOX_FAST[team][row - 'A'][BOARD_COL - col];
 }
 
 
 void Board::update_check_piece(char row, int col, bool value = false) {
-    CHECK_PIECE_FAST[row - 'A'][8 - col] = value;
+    CHECK_PIECE_FAST[row - 'A'][BOARD_COL - col] = value;
 }
 
 void Board::clear_check_hitbox() {
@@ -220,25 +220,21 @@ void Board::draw_piece(sf::RenderWindow &window) {
 }
 
 void Board::update_check_hitbox(char team, char row, int col, bool value = false) {
-    CHECK_HITBOX_FAST[team][row - 'A'][8 - col] = true;
+    CHECK_HITBOX_FAST[team][row - 'A'][BOARD_COL - col] = true;
 }
 
 void Board::refresh_check_hitbox() {
-    for (const auto& pair : PIECE_TO_HITBOX_MAPPING) {
-        for (const auto& moveset : pair.second) {
-            for (const auto& move : moveset.second) {
-                CHECK_HITBOX_FAST[pair.first][move.first - 'A'][8 - move.second] = true;
-            }
+    Board::clear_check_hitbox();
+    char team;
+
+    for (const auto &pair: PIECES)
+    {
+        team = pair.second->get_team();
+        for (const auto &move: pair.second->get_moves(pair.first, true))
+        {
+            CHECK_HITBOX_FAST[team][move.first - 'A'][BOARD_COL - move.second] = true;
         }
     }
-}
-
-std::vector<Position>& Board::get_piece_hitboxes(char &team, std::string &name) {
-    return PIECE_TO_HITBOX_MAPPING[team][name];
-}
-
-void Board::save_piece_hitboxes(char &team, std::string &name, std::vector<Position> valid_moves) {
-    PIECE_TO_HITBOX_MAPPING[team][name] = valid_moves;
 }
 
 void Board::save_map_of_pieces(char team, std::string name, Piece* piece) {

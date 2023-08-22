@@ -37,7 +37,6 @@ void Piece::update_position(Position pos) {
     set_position(pos);
 
     // Watch for this
-    Board::clear_check_hitbox();
     Board::refresh_check_hitbox();
 }
 
@@ -77,10 +76,6 @@ sf::Texture* Piece::load_sprite(const std::string& name, char team_color) {
     return sprite;
 }
 
-void Piece::save_moves_globally(std::string piece_name) {
-    Board::save_piece_hitboxes(team, piece_name, valid_moves);
-}
-
 bool Piece::is_king_in_check() {
     King* king = dynamic_cast<King*>(Board::get_piece_from_map(team, "king"));
     if(king != nullptr) {
@@ -92,6 +87,18 @@ bool Piece::is_king_in_check() {
 void Piece::calc_valid_moves() {
     valid_moves.clear();
 }
+
+char Piece::get_team() {
+    return team;
+}
+
+// bool Piece::is_this_move_going_to_stop_check(Position pos) {
+//     if(!is_king_in_check())
+//         return;
+
+    
+    
+// }
 
 /*
     OVERLOADED FUNCTIONS

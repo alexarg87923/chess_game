@@ -15,8 +15,17 @@ void Queen::calc_valid_moves() {
 
     if (name != "king" && is_king_in_check()) return;
 
-    calculate_rook_path(position);
-    calculate_bishop_path(position);
+    valid_moves = get_moves(position, false);
+}
 
-    save_moves_globally(name);
+std::vector<Position> Queen::get_moves(Position pos, bool get_every_move) {
+    std::vector<Position> moves;
+
+    auto bishop_moves = Bishop::get_moves(position, get_every_move);
+    auto rook_moves = Rook::get_moves(position, get_every_move);
+
+    moves.insert(moves.end(), bishop_moves.begin(), bishop_moves.end());
+    moves.insert(moves.end(), rook_moves.begin(), rook_moves.end());
+
+    return moves;
 }

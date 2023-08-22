@@ -14,26 +14,27 @@ void Rook::calc_valid_moves() {
 
     if (name != "king" && is_king_in_check()) return;
 
-    calculate_rook_path(position);
-    save_moves_globally(name);
+    valid_moves = get_moves(position, false);
 }
 
-void Rook::calculate_rook_path(Position pos) {
+std::vector<Position> Rook::get_moves(Position pos, bool get_every_move = false) {
     char row_begin = pos.first, row_end = 7 + 'A';
     int col_begin = pos.second, col_end = BOARD_COL;
+
+    std::vector<Position> moves;
 
     // LEFT
     row_begin--;
     for (char i = row_begin; i >= 'A'; i--) {
-        valid_moves.push_back(std::make_pair(i, position.second));
-        if (Board::check_piece(i, position.second))
+        moves.push_back(std::make_pair(i, position.second));
+        if (Board::check_piece(i, position.second) && !get_every_move)
             break;
     }
     // UP
     col_begin++;
     for (int i = col_begin; i <= col_end; i++) {
-        valid_moves.push_back(std::make_pair(position.first, i));
-        if (Board::check_piece(position.first, i))
+        moves.push_back(std::make_pair(position.first, i));
+        if (Board::check_piece(position.first, i) && !get_every_move)
             break;
     }
 
@@ -43,16 +44,18 @@ void Rook::calculate_rook_path(Position pos) {
     // RIGHT
     row_begin++;
     for (char i = row_begin; i <= row_end; i++) {
-        valid_moves.push_back(std::make_pair(i, position.second));
-        if (Board::check_piece(i, position.second))
+        moves.push_back(std::make_pair(i, position.second));
+        if (Board::check_piece(i, position.second) && !get_every_move)
             break;
     }
     
     // DOWN
     col_begin--;
     for (int i = col_begin; i >= 1; i--) {
-        valid_moves.push_back(std::make_pair(position.first, i));
-        if (Board::check_piece(position.first, i))
+        moves.push_back(std::make_pair(position.first, i));
+        if (Board::check_piece(position.first, i) && !get_every_move)
             break;
     }
+
+    return moves;
 }

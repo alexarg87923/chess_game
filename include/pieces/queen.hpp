@@ -18,6 +18,8 @@ public:
     Queen(char row, int col, char team_color);
     Queen(Position pos, char team_color);
 
+    std::vector<Position> get_moves(Position pos, bool get_every_move) override;
+
     void calc_valid_moves() override;
 private:
     std::string name = "queen"; 

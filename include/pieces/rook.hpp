@@ -15,10 +15,11 @@ public:
 
     Rook(char row, int col, char team_color);
     Rook(Position pos, char team_color);
-
     void calc_valid_moves() override;
+
 protected:
-    void calculate_rook_path(Position pos);
+    std::vector<Position> get_moves(Position pos, bool get_every_move) override;
+
 private:
     std::string name = "rook"; 
 };

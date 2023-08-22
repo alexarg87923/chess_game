@@ -15,22 +15,28 @@ void King::calc_valid_moves() {
 
     if (name != "king" && is_king_in_check()) return;
 
+    valid_moves = get_moves(position, false);
+}
+
+std::vector<Position> King::get_moves(Position pos, bool get_every_move = false) {
     const int RANGE_START = -1;
     const int RANGE_END = 2;
     const int ZERO_OFFSET = 0;
+
+    std::vector<Position> moves;
 
     for (int i = RANGE_START; i < RANGE_END; i++) {
         for (int j = RANGE_START; j < RANGE_END; j++) {
             Position new_pos = std::make_pair(position.first + i, position.second + j);
             if (!(i == ZERO_OFFSET && j == ZERO_OFFSET)) {
                 if (validate_move(new_pos))
-                    valid_moves.push_back(new_pos);
+                    moves.push_back(new_pos);
             }
         }
     }
-
-    save_moves_globally(name);
+    return moves;
 }
+
 
 bool King::validate_move(char row, int col) {
     bool valid_move = Piece::validate_move(row, col);
@@ -53,7 +59,7 @@ void King::update_position(Position pos) {
 }
 
 bool King::is_in_check() {
-    return Board::check_hitbox(team, position);
+    return Board::check_hitbox((team == 'w') ? 'b' : 'w', position);
 }
 
 

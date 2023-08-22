@@ -22,6 +22,8 @@ public:
     bool validate_move(char row, int col) override;
     bool validate_move(Position pos) override;
 
+    std::vector<Position> get_moves(Position pos, bool get_every_move) override;
+
     void update_position(Position pos) override;
 private:
     bool already_moved = false;

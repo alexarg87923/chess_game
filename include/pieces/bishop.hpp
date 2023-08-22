@@ -18,7 +18,7 @@ public:
 
     void calc_valid_moves() override;
 protected:
-    void calculate_bishop_path(Position pos);
+    std::vector<Position> get_moves(Position pos, bool get_every_move) override;
 private:
     std::string name = "bishop"; 
 

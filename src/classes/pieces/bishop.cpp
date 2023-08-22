@@ -15,62 +15,40 @@ void Bishop::calc_valid_moves() {
 
     if (name != "king" && is_king_in_check()) return;
 
-    calculate_bishop_path(position);
-    save_moves_globally(name);
+    valid_moves = get_moves(position, false);
 }
 
-void Bishop::calculate_bishop_path(Position pos) {
+std::vector<Position> Bishop::get_moves(Position pos, bool get_every_move = false) {
     char row_begin = pos.first, row_end = 7 + 'A';
     int col_begin = pos.second, col_end = BOARD_COL;
-    bool do_not_continue = false;
+
     int j = col_begin + 1;
 
-    // TOP LEFT
-    for (char i = row_begin - 1, j = col_begin + 1, do_not_continue = false; i >= 'A' && j <= BOARD_COL; i--, j++) {
-        if (!do_not_continue)
-            valid_moves.push_back(std::make_pair(i, j));
+    std::vector<Position> all_moves;    
 
-        if (Board::check_piece(i, j)) {
-            Board::update_check_hitbox(team, i, j, true);
-            do_not_continue = true;
-            break;
-        }
+    // TOP LEFT
+    for (char i = row_begin - 1, j = col_begin + 1; i >= 'A' && j <= BOARD_COL; i--, j++) {
+        all_moves.push_back(std::make_pair(i, j));
+        if (Board::check_piece(i, j) && !get_every_move) break;
     }
 
     // TOP RIGHT
-    for (char i = row_begin + 1, j = col_begin + 1, do_not_continue = false; i <= 'H' && j <= BOARD_COL; i++, j++) {
-        if (!do_not_continue)
-            valid_moves.push_back(std::make_pair(i, j));
-
-        if (Board::check_piece(i, j)) {
-            Board::update_check_hitbox(team, i, j, true);
-            do_not_continue = true;
-            break;
-        }
+    for (char i = row_begin + 1, j = col_begin + 1; i <= 'H' && j <= BOARD_COL; i++, j++) {
+        all_moves.push_back(std::make_pair(i, j));
+        if (Board::check_piece(i, j) && !get_every_move) break;
     }
 
     // BOTTOM RIGHT
-    for (char i = row_begin + 1, j = col_begin - 1, do_not_continue = false; i <= 'H' && j > 0; i++, j--) {
-        if (!do_not_continue)
-            valid_moves.push_back(std::make_pair(i, j));
-
-        if (Board::check_piece(i, j)) {
-            Board::update_check_hitbox(team, i, j, true);
-            do_not_continue = true;
-            break;
-        }
+    for (char i = row_begin + 1, j = col_begin - 1; i <= 'H' && j > 0; i++, j--) {
+        all_moves.push_back(std::make_pair(i, j));
+        if (Board::check_piece(i, j) && !get_every_move) break;
     }
 
     // BOTTOM LEFT
-    for (char i = row_begin - 1, j = col_begin - 1, do_not_continue = false; i >= 'A' && j > 0; i--, j--) {
-        if (!do_not_continue)
-            valid_moves.push_back(std::make_pair(i, j));
-
-        if (Board::check_piece(i, j)) {
-            Board::update_check_hitbox(team, i, j, true);
-            do_not_continue = true;
-            break;
-        }
+    for (char i = row_begin - 1, j = col_begin - 1; i >= 'A' && j > 0; i--, j--) {
+        all_moves.push_back(std::make_pair(i, j));
+        if (Board::check_piece(i, j) && !get_every_move) break;
     }
-}
 
+    return all_moves;
+}

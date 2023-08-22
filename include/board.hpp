@@ -8,8 +8,8 @@
 #include <map>
 #include <piece.hpp>
 
-using PieceNameToHitboxPosition = std::unordered_map<std::string, std::vector<Position>>;
-using TeamToPieceMap = std::unordered_map<char, PieceNameToHitboxPosition>;
+// using PieceNameToHitboxPosition = std::unordered_map<std::string, std::vector<Position>>;
+// using TeamToPieceMap = std::unordered_map<char, PieceNameToHitboxPosition>;
 
 class Board {
 public:
@@ -32,7 +32,6 @@ public:
     void refresh_valid_moves();
 
     static void refresh_check_hitbox();
-    static void clear_check_hitbox();
     static void update_check_hitbox(char team, char row, int col, bool value);
     static sf::Vector2f get_size_of_grid_square();
     static void set_size_of_grid_square(sf::Vector2f tmp);
@@ -48,8 +47,8 @@ public:
     static void update_check_piece(Position key, bool value);
     static void update_check_piece(char row, int col, bool value);
 
-    static std::vector<Position>& get_piece_hitboxes(char &team, std::string &name);
-    static void save_piece_hitboxes(char &team, std::string &name, std::vector<Position> valid_moves);
+    // static std::vector<Position>& get_piece_hitboxes(char &team, std::string &name);
+    // static void save_piece_hitboxes(char &team, std::string &name, std::vector<Position> valid_moves);
 
     static sf::RectangleShape get_grid_square_from_map(Position key);
     static sf::RectangleShape get_grid_square_from_map(char row, int col);
@@ -70,16 +69,18 @@ private:
     static sf::Vector2f GRID_SQUARE_SIZE;
     static std::map<Position, sf::RectangleShape> MAP_OF_GRID;
     static std::map<Position, Piece*> PIECES;
+    static std::map<char, std::map<std::string, Piece*>> MAP_OF_PIECES;
     static bool CHECK_PIECE_FAST[BOARD_ROW][BOARD_COL];
     static std::unordered_map<char, bool[BOARD_ROW][BOARD_COL]> CHECK_HITBOX_FAST;
-    static TeamToPieceMap PIECE_TO_HITBOX_MAPPING;
-    static std::map<char, std::map<std::string, Piece*>> MAP_OF_PIECES;
-
+    
     std::map<Position, sf::RectangleShape*> HITBOXES;
     
 
     static sf::Vector2f MAP_OF_POSITIONS[BOARD_ROW][BOARD_COL];
     Piece* selected_piece = nullptr;
+
+    static void clear_check_hitbox();
+
 
     sf::RectangleShape board;
     void add_grid();

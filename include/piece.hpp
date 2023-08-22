@@ -20,12 +20,15 @@ public:
     Piece(char row, int col, char team_color);
     Piece(Position pos, char team_color);
 
-    virtual void draw(sf::RenderTarget& target) const;
-    virtual void update_position(Position pos);
-    virtual std::vector<Position> get_valid_moves();
-    virtual sf::RectangleShape* get_ppiece();
-    virtual void calc_valid_moves();
+    Position get_pos();
+    void draw(sf::RenderTarget& target) const;
+    std::vector<Position> get_valid_moves();
+    sf::RectangleShape* get_ppiece();
+    char get_team();
 
+    virtual void update_position(Position pos);
+    virtual void calc_valid_moves();
+    virtual std::vector<Position> get_moves(Position pos, bool get_every_move) = 0;
 protected:
     sf::RectangleShape* piece;
     std::vector<Position> valid_moves;
@@ -34,19 +37,19 @@ protected:
     std::string name;
 
     virtual void save_piece(sf::RectangleShape *tmp);
-
-    virtual Position get_pos();
-
     virtual bool validate_move(char row, int col);
     virtual bool validate_move(Position pos);
-    virtual std::string get_working_dir();
-    virtual sf::Texture* load_sprite(const std::string& name, char team_color);
-    virtual void save_moves_globally(std::string piece_name);
 
-    void save_piece_to_map(char team, std::string name, Piece* piece);
+    sf::Texture* load_sprite(const std::string& name, char team_color);
+
     bool is_king_in_check();
+    void save_piece_to_map(char team, std::string name, Piece* piece);
+
+    // bool is_this_move_going_to_stop_check(Position pos);
 private:
     void set_position(Position &pos);
+    std::string get_working_dir();
+
 };
 
 #endif
