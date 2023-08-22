@@ -4,6 +4,9 @@
 #include "chess_ai.hpp"
 #include "hitbox_manager.hpp"
 
+#include <queue>
+#include <set>
+
 class Piece;
 
 class Move_Handler {
@@ -17,9 +20,18 @@ private:
     Board& game_board;
 
     Hitbox_Manager hitbox_manager;
-    std::map<Position, std::vector<std::shared_ptr<Piece>>> obstruction_manager;
+
+    std::map<Position, std::vector<std::shared_ptr<Piece>>> obstructing_pieces_manager;
+    std::map<Position, std::vector<std::shared_ptr<Piece>>> obstructed_pieces_manager;
+
+    std::queue<std::shared_ptr<Piece>> deferred_pieces;
+    std::set<std::shared_ptr<Piece>> processed_pieces;
 
     std::pair<std::vector<Position>, std::vector<std::shared_ptr<Piece>>> check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::map<int, std::queue<Position>> moves);
     void reset_hitboxes(std::shared_ptr<Piece> piece);
-    void reset_pieces_at(const Position pos);
+    void reset_obstructed_at(const Position pos);
+
+
+    void add_obstructed(const Position pos, std::shared_ptr<Piece> piece);
+    void check_if_im_obstructing(const Position pos, std::shared_ptr<Piece> piece);
 };

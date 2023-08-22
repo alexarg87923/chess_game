@@ -47,7 +47,7 @@ void Game::initialize_pieces() {
     move_handler.place_piece(std::make_shared<Bishop>('B', 5, BLACK, size_of_grid_square));
 
     move_handler.place_piece(std::make_shared<Bishop>('C', 1, WHITE, size_of_grid_square));
-    move_handler.place_piece(std::make_shared<Rook>('H', 1, WHITE, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Rook>('H', 4, WHITE, size_of_grid_square));
     move_handler.place_piece(std::make_shared<Knight>('G', 1, WHITE, size_of_grid_square));
 }
 
