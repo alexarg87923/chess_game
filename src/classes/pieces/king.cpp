@@ -20,7 +20,7 @@ std::map<int, std::queue<Position>> King::calc_moves(const Position& pos) const 
             Position new_pos = {static_cast<char>(pos_copy.row + i), pos_copy.col + j};
             if (!(i == ZERO_OFFSET && j == ZERO_OFFSET)) {
                 if (validate_in_bounds(new_pos))
-                    moves[direction].push(new_pos);
+                    moves[direction++].push(new_pos);
             }
         }
     } 

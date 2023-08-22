@@ -21,5 +21,5 @@ private:
 
     std::pair<std::vector<Position>, std::vector<std::shared_ptr<Piece>>> check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::map<int, std::queue<Position>> moves);
     void reset_hitboxes(std::shared_ptr<Piece> piece);
-    // void reset_parents_at(const Position pos);
+    void reset_pieces_at(const Position pos);
 };
