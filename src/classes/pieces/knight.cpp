@@ -1,5 +1,7 @@
 #include "pieces/knight.hpp"
 
+#include "board.hpp"
+
 Knight::Knight(){}
 Knight::~Knight(){}
 Knight::Knight(Position pos, char team_color) : Knight(pos.first, pos.second, team_color) {}

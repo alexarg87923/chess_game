@@ -7,8 +7,6 @@
 #include "pieces/bishop.hpp"
 #include "pieces/rook.hpp"
 
-#include "board.hpp"
-
 class Queen : public Rook, public Bishop {
 public:
     Queen();

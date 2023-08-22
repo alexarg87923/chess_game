@@ -1,5 +1,7 @@
 #include "pieces/pawn.hpp"
 
+#include "board.hpp"
+
 Pawn::Pawn() {}
 Pawn::~Pawn() {}
 Pawn::Pawn(Position pos, char team_color) : Pawn(pos.first, pos.second, team_color) {}

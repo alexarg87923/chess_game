@@ -1,5 +1,7 @@
 #include "pieces/king.hpp"
-#include "window.hpp"
+
+#include "game.hpp"
+#include "board.hpp"
 
 King::King(){}
 King::~King(){}
@@ -43,9 +45,9 @@ bool King::validate_move(char row, int col) {
     bool valid_move = Piece::validate_move(row, col);
     bool safe_square = true;
 
-    if(Window::get_board_hitboxes().check_hitbox((team == 'w') ? 'b' : 'w', row, col)) {
-        safe_square = false;
-    }
+    // if(Game::get_hitbox_states().check_hitbox((team == 'w') ? 'b' : 'w', row, col)) {
+    //     safe_square = false;
+    // }
 
     return valid_move && safe_square;
 }
@@ -59,7 +61,8 @@ void King::update_position(Position pos) {
 }
 
 bool King::is_in_check() {
-    return Window::get_board_hitboxes().check_hitbox((team == 'w') ? 'b' : 'w', piece_position);
+    return false;
+    // return Game::get_hitbox_states().check_hitbox((team == 'w') ? 'b' : 'w', piece_position);
 }
 
 

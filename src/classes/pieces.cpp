@@ -1,7 +1,9 @@
 #include "piece.hpp"
+
 #include "board.hpp"
 #include "pieces/king.hpp"
-#include "window.hpp"
+#include "game.hpp"
+#include "hitbox.hpp"
 
 Piece::Piece(char row, int col, char team_color) : Piece(std::make_pair(row, col), team_color) {}
 Piece::Piece(Position pos, char team_color) {
@@ -30,15 +32,12 @@ Position Piece::get_pos() {
     return piece_position;
 }
 
-sf::RectangleShape *Piece::get_ppiece() {
+sf::RectangleShape *Piece::get_piece() {
     return piece;
 }
 
 void Piece::update_position(Position pos) {
     set_position(pos);
-
-    // IF ISSUES WITH HITBOXES, UNCOMMENT
-     Window::get_board_hitboxes().refresh_check_hitbox();
 }
 
 void Piece::set_position(Position &pos) {
@@ -99,7 +98,15 @@ bool Piece::is_this_move_going_to_stop_check(Position move) {
 
     Chess_AI game_simulation;
 
-    return game_simulation.will_this_move_stop_check(Window::get_board_hitboxes(), move);
+    return game_simulation.will_this_move_stop_check(Game::get_hitbox_states(), move);
+}
+
+std::vector<Hitbox*> Piece::get_hitboxes() {
+    return hitboxes;
+}
+
+void Piece::clear_hitboxes() {
+    hitboxes.clear();
 }
 
 /*

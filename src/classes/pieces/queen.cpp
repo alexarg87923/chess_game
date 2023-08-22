@@ -1,5 +1,7 @@
 #include "pieces/queen.hpp"
 
+#include "board.hpp"
+
 Queen::Queen(){}
 Queen::~Queen(){}
 Queen::Queen(Position pos, char team_color) : Queen(pos.first, pos.second, team_color) {}

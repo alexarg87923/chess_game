@@ -3,10 +3,10 @@
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+
 #include "piece.hpp"
 
-#include "board.hpp"
-
+class Board;
 
 class Rook : virtual public Piece {
 public:

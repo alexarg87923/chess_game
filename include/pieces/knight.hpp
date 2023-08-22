@@ -5,8 +5,8 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 
 #include "piece.hpp"
-#include "board.hpp"
 
+class Board;
 
 class Knight : public Piece {
 public:

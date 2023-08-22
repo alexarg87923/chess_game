@@ -1,9 +1,9 @@
-#include "window.hpp"
+#include "game.hpp"
 #include <iostream>
 #include <memory>
 
 int main() {
-    std::unique_ptr<Window> game = std::make_unique<Window>();
+    std::unique_ptr<Game> game = std::make_unique<Game>();
 
     game->start();
 

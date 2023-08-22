@@ -1,5 +1,7 @@
 #include "pieces/bishop.hpp"
 
+#include "board.hpp"
+
 Bishop::Bishop(){}
 Bishop::~Bishop(){}
 Bishop::Bishop(Position pos, char team_color) : Bishop(pos.first, pos.second, team_color) {}

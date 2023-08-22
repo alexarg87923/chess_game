@@ -3,10 +3,7 @@
 Chess_AI::Chess_AI(){}
 Chess_AI::~Chess_AI(){}
 
-bool Chess_AI::will_this_move_stop_check(Array_Manager board, Position pos) {
-    board.clear_check_hitbox();
-
-
+bool Chess_AI::will_this_move_stop_check(State_Manager board, Position pos) {
 
     return false;
 }

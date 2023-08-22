@@ -1,10 +1,12 @@
 #include "board.hpp"
+
 #include "piece.hpp"
 
 sf::Vector2f Board::GRID_SQUARE_SIZE = sf::Vector2f(0, 0);
 std::map<Position, sf::RectangleShape> Board::MAP_OF_GRID;
 std::map<Position, Piece*> Board::PIECES;
 sf::Vector2f Board::MAP_OF_POSITIONS[BOARD_ROW][BOARD_COL];
+
 bool Board::CHECK_PIECE_FAST[BOARD_ROW][BOARD_COL];
 std::map<char, std::map<std::string, Piece*>> Board::MAP_OF_PIECES;
 
@@ -61,24 +63,11 @@ void Board::draw_grid(sf::RenderWindow &window) {
 
 std::optional<Piece*> Board::check_clicked_piece(sf::Vector2i mouse_pos) {
     for (auto pair : get_map_of_piece()) {
-        if(pair.second->get_ppiece()->getGlobalBounds().contains(mouse_pos.x, mouse_pos.y)) {
+        if(pair.second->get_piece()->getGlobalBounds().contains(mouse_pos.x, mouse_pos.y)) {
             return pair.second;
         }
     }
     return std::nullopt;
-}
-
-std::optional<Position> Board::check_clicked_hitbox(sf::Vector2i mouse_pos) {
-    for (auto each : HITBOXES) {
-        if(each.second->getGlobalBounds().contains(mouse_pos.x, mouse_pos.y)) {
-            return each.first;
-        }
-    }
-    return std::nullopt;
-}
-
-void Board::clear_hitboxes() {
-    HITBOXES.clear();
 }
 
 void Board::select_piece(Piece* piece) {
@@ -87,39 +76,6 @@ void Board::select_piece(Piece* piece) {
 
 Piece* Board::get_selected_piece() {
     return selected_piece;
-}
-
-void Board::make_hitboxes() {
-    if (!selected_piece) {
-        HITBOXES.clear();
-        return;
-    }
-
-    auto valid_moves = selected_piece->get_valid_moves();
-
-    for (auto move : valid_moves) {
-        sf::RectangleShape *tmp = new sf::RectangleShape(GRID_SQUARE_SIZE);
-        
-        tmp->setPosition(pair_to_pos(move));
-
-        if (check_piece(move))
-        {
-            tmp->setFillColor(sf::Color(0, 0, 255, 128));
-        } else {
-            tmp->setFillColor(sf::Color(0, 0, 255));
-        }
-
-        HITBOXES[move] = tmp;
-    }
-}
-void Board::draw_hitboxes(sf::RenderWindow &window) {
-    if (!selected_piece) {
-        return;
-    }
-
-    for (auto each : HITBOXES) {
-        window.draw(*(each.second));
-    }
 }
 
 sf::RectangleShape Board::get_board() {
@@ -163,7 +119,6 @@ std::optional<Piece*> Board::get_piece(char row, int col) {
     }
 }
 
-
 bool Board::check_piece(char row, int col) {
     return CHECK_PIECE_FAST[row - 'A'][BOARD_COL - col];
 }
@@ -193,12 +148,6 @@ void Board::set_piece(Position key, Piece *val) {
     }
 }
 
-void Board::refresh_valid_moves() {
-    for (auto pair : PIECES) {
-        pair.second->calc_valid_moves();
-    }
-}
-
 void Board::draw_piece(sf::RenderWindow &window) {
     for (auto pair : PIECES) {
         pair.second->draw(window);
@@ -211,6 +160,49 @@ void Board::save_map_of_pieces(char team, std::string name, Piece* piece) {
 
 Piece* Board::get_piece_from_map(char team, std::string name) {
     return MAP_OF_PIECES[team][name];
+}
+
+
+
+
+std::optional<Position> Board::check_clicked_hitbox(sf::Vector2i mouse_pos) {
+    for (auto each : HITBOXES) {
+        if(each.second->get_hitbox().getGlobalBounds().contains(mouse_pos.x, mouse_pos.y)) {
+            return each.first;
+        }
+    }
+    return std::nullopt;
+}
+
+void Board::clear_hitboxes() {
+    HITBOXES.clear();
+}
+
+void Board::make_hitboxes() {
+    if (!selected_piece) {
+        HITBOXES.clear();
+        return;
+    }
+
+    // auto valid_moves = selected_piece->get_valid_moves();
+
+    // for (auto move : valid_moves) {
+    //     Hitbox *tmp = new Hitbox(GRID_SQUARE_SIZE, move, pair_to_pos(move), (check_piece(move) ? sf::Color(0, 0, 255, 128) : sf::Color(0, 0, 255)), selected_piece);
+
+    //     HITBOXES[move] = tmp;
+    // }
+
+    selected_piece->get_hitboxes();
+}
+
+void Board::draw_hitboxes(sf::RenderWindow &window) {
+    if (!selected_piece) {
+        return;
+    }
+
+    for (auto each : HITBOXES) {
+        window.draw(each.second->get_hitbox());
+    }
 }
 
 

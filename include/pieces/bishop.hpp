@@ -5,7 +5,8 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 
 #include "piece.hpp"
-#include "board.hpp"
+
+class Board;
 
 class Bishop : virtual public Piece {
 public:

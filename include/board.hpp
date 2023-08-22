@@ -4,11 +4,12 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 
-#include <iostream>
 #include <map>
 
 #include "constant.hpp"
 #include "types.hpp"
+
+#include "hitbox.hpp"
 
 class Piece;
 
@@ -30,7 +31,6 @@ public:
     Piece* get_selected_piece();
     void make_hitboxes();
     void clear_hitboxes();
-    void refresh_valid_moves();
 
     static sf::Vector2f get_size_of_grid_square();
     static void set_size_of_grid_square(sf::Vector2f tmp);
@@ -61,12 +61,13 @@ public:
 
 private:
     static sf::Vector2f GRID_SQUARE_SIZE;
+
     static std::map<Position, sf::RectangleShape> MAP_OF_GRID;
     static std::map<Position, Piece*> PIECES;
     static std::map<char, std::map<std::string, Piece*>> MAP_OF_PIECES;
     static bool CHECK_PIECE_FAST[BOARD_ROW][BOARD_COL];
 
-    std::map<Position, sf::RectangleShape*> HITBOXES;
+    std::map<Position, Hitbox*> HITBOXES;
 
     static sf::Vector2f MAP_OF_POSITIONS[BOARD_ROW][BOARD_COL];
     Piece* selected_piece = nullptr;

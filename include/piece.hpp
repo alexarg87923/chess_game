@@ -13,8 +13,7 @@
 #include "types.hpp"
 #include "chess_ai.hpp"
 
-class Window;
-class Board;
+// class Hitbox;
 class King;
 
 class Piece {
@@ -27,8 +26,10 @@ public:
     Position get_pos();
     void draw(sf::RenderTarget& target) const;
     std::vector<Position> get_valid_moves();
-    sf::RectangleShape* get_ppiece();
+    sf::RectangleShape* get_piece();
     char get_team();
+    std::vector<Hitbox*> get_hitboxes();
+    void clear_hitboxes();
 
     virtual void update_position(Position pos);
     virtual void calc_valid_moves();
@@ -39,6 +40,7 @@ protected:
     char team;
     Position piece_position;
     std::string name;
+    std::vector<Hitbox*> hitboxes;
 
     virtual void save_piece(sf::RectangleShape *tmp);
     virtual bool validate_move(char row, int col);
