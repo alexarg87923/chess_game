@@ -51,6 +51,8 @@ public:
     std::map<MoveAttributes, std::vector<std::queue<Position>>>& get_moves_mutable();
     const std::map<MoveAttributes, std::vector<std::queue<Position>>>& get_moves() const;
     void invalidate_moves();
+
+    bool is_king() const;
 protected:
     std::unique_ptr<sf::RectangleShape> piece_rect_obj;
     Color team;

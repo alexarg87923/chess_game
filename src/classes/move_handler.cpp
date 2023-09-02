@@ -9,14 +9,18 @@ void Move_Handler::move_piece(std::shared_ptr<Piece> piece, Position pos) {
 
     game_board.set_piece(position, nullptr); // clear the old position of the piece
 
+    // game_board.set_piece(pos, piece);
+
     reset_obstructed_at(position); // if pieces were being obstructed, now that i removed the piece from the board, i can recalculate
-                                    // and see if the piece is still obstructed
+    simulate_update(); // and see if the piece is still obstructed
 
-    piece->set_piece_pos(pos); // set the configuratoin of the piece
+    if (hitbox_in_pos_of_king(piece->get_team())) {
+        game_board.set_piece(position, piece);
+    } else {
+        piece->set_piece_pos(pos); // set the configuratoin of the piece
+    }
 
-    piece->invalidate_moves(); // since piece now has a new position then old moves are invalid
-
-    place_piece(piece); // place the piece on the state manager
+    piece->invalidate_moves();
 }
 
 void Move_Handler::reset_hitboxes(std::shared_ptr<Piece> piece) {
@@ -56,35 +60,72 @@ void Move_Handler::update_deferred_pieces() {
     }
 }
 
+void Move_Handler::simulate_update() {
+    std::queue<std::shared_ptr<Piece>> temp_queue = deferred_pieces;
+
+    while (!temp_queue.empty()) {
+        auto piece_to_place = temp_queue.front();
+        temp_queue.pop();
+        place_piece(piece_to_place);
+    }
+}
+
 std::vector<Position> Move_Handler::check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::map<MoveAttributes, std::vector<std::queue<Position>>> moves) {
     std::vector<Position> valid_moves;
+    std::queue<Position> temp_queue;
+
+    if (squares_between.size() == 2 && !inc_piece->is_king()) {
+        return valid_moves; // return empty as only king moves are valid
+    }
 
     for (auto & moves_pair : moves) {
         if (!moves_pair.second.empty()) {
             for (auto & queue : moves_pair.second) {
+                std::queue<Position> move_queue;
+    
                 while (!queue.empty()) {
-                    const Position& nextPos = queue.front();
-                    auto pieceOpt = game_board.get_piece(nextPos);
-                    auto moveAttr = moves_pair.first;
+                    const Position& next_pos = queue.front();
+                    auto piece_opt = game_board.get_piece(next_pos);
+                    MoveAttributes move_attr = moves_pair.first;
 
-                    if (pieceOpt.has_value()) {
-                        auto piece = pieceOpt.value();
-
-                        if (piece->get_team() != inc_piece->get_team() && 
-                            (moveAttr == MoveAttributes::VALID_ON_ENEMY_ONLY || moveAttr == MoveAttributes::SEARCH)) {
-                            valid_moves.push_back(nextPos);
-                        }
-                        add_obstructed(nextPos, inc_piece);
+                    if (squares_between.size() == 1 && move_attr == MoveAttributes::SEARCH && !inc_piece->is_king() && is_in_squares_between(next_pos)) {
+                        valid_moves.push_back(next_pos);
                         queue.pop();
-                        break;
+                    } else if (squares_between.size() == 0) {
+                        if (piece_opt.has_value()) {
+                            std::shared_ptr<Piece> piece = piece_opt.value();
+                            Color team = inc_piece->get_team();
+
+                            if (piece->get_team() != team &&
+                                (move_attr == MoveAttributes::VALID_ON_ENEMY_ONLY || move_attr == MoveAttributes::SEARCH)) {
+                                valid_moves.push_back(next_pos);
+                            }
+
+                            add_obstructed(next_pos, inc_piece);
+
+                            
+                            // This is checking for king
+                            if (piece == game_board.get_king((team == BLACK ? WHITE : BLACK))) {
+                                squares_between.push_back(move_queue);
+                                break;
+                            }
+
+                            move_queue.push(queue.front());
+                            queue.pop();
+
+                            break;
+                        } else if (move_attr == MoveAttributes::OBSTRUCT_ON_OCCUPY || move_attr == MoveAttributes::SEARCH) {
+                            valid_moves.push_back(next_pos);
+                            move_queue.push(queue.front());
+                            queue.pop();
+                        } else {
+                            move_queue.push(queue.front());
+                            queue.pop();
+                        }
+                    } else {
+                        move_queue.push(queue.front());
+                        queue.pop();
                     }
-
-                    if (moveAttr == MoveAttributes::OBSTRUCT_ON_OCCUPY || moveAttr == MoveAttributes::SEARCH) {
-                        valid_moves.push_back(nextPos);
-                    }
-
-                    queue.pop();
-
                 }
             }
         }
@@ -134,4 +175,19 @@ void Move_Handler::check_if_im_obstructing(const Position pos, std::shared_ptr<P
 
 void Move_Handler::add_obstructed(const Position pos, std::shared_ptr<Piece> piece) {
     obstructed_pieces_manager[pos].emplace_back(piece);
+}
+
+bool Move_Handler::hitbox_in_pos_of_king(Color team) {
+    return !hitbox_manager.check_hitbox(game_board.get_king(team)->get_pos()).empty();
+}
+
+bool Move_Handler::is_in_squares_between(const Position& pos) {
+    for (const auto& queue : squares_between) {
+        std::queue<Position> temp = queue;  // Create a copy to iterate through
+        while (!temp.empty()) {
+            if (temp.front() == pos) return true;
+            temp.pop();
+        }
+    }
+    return false;
 }

@@ -13,32 +13,32 @@ std::map<MoveAttributes, std::vector<std::queue<Position>>> Bishop::calc_moves(c
     std::map<MoveAttributes, std::vector<std::queue<Position>>> moves;
 
     // Diagonal up-right
-    std::queue<Position> upRightMoves;
+    std::queue<Position> up_right;
     for (char i = row_start - 1, j = col_start + 1; i >= 'A' && j <= col_end; i--, j++) {
-        upRightMoves.push({i, j});
+        up_right.push({i, j});
     }
-    moves[MoveAttributes::SEARCH].push_back(upRightMoves);
+    moves[MoveAttributes::SEARCH].push_back(up_right);
 
     // Diagonal down-right
-    std::queue<Position> downRightMoves;
+    std::queue<Position> down_right;
     for (char i = row_start + 1, j = col_start + 1; i <= row_end && j <= col_end; i++, j++) {
-        downRightMoves.push({i, j});
+        down_right.push({i, j});
     }
-    moves[MoveAttributes::SEARCH].push_back(downRightMoves);
+    moves[MoveAttributes::SEARCH].push_back(down_right);
 
     // Diagonal down-left
-    std::queue<Position> downLeftMoves;
+    std::queue<Position> down_left;
     for (char i = row_start + 1, j = col_start - 1; i <= row_end && j >= 1; i++, j--) {
-        downLeftMoves.push({i, j});
+        down_left.push({i, j});
     }
-    moves[MoveAttributes::SEARCH].push_back(downLeftMoves);
+    moves[MoveAttributes::SEARCH].push_back(down_left);
 
     // Diagonal up-left
-    std::queue<Position> upLeftMoves;
+    std::queue<Position> up_left;
     for (char i = row_start - 1, j = col_start - 1; i >= 'A' && j >= 1; i--, j--) {
-        upLeftMoves.push({i, j});
+        up_left.push({i, j});
     }
-    moves[MoveAttributes::SEARCH].push_back(upLeftMoves);
+    moves[MoveAttributes::SEARCH].push_back(up_left);
 
     return moves;
 }

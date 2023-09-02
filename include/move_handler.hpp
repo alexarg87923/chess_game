@@ -27,6 +27,8 @@ private:
     std::queue<std::shared_ptr<Piece>> deferred_pieces;
     std::set<std::shared_ptr<Piece>> processed_pieces;
 
+    std::vector<std::queue<Position>> squares_between;
+
     std::vector<Position> check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::map<MoveAttributes, std::vector<std::queue<Position>>> moves);
     void reset_hitboxes(std::shared_ptr<Piece> piece);
     void reset_obstructed_at(const Position pos);
@@ -37,4 +39,11 @@ private:
 
     void add_obstructed(const Position pos, std::shared_ptr<Piece> piece);
     void check_if_im_obstructing(const Position pos, std::shared_ptr<Piece> piece);
+
+    bool hitbox_in_pos_of_king(Color team);
+
+    void simulate_update();
+
+    bool is_in_squares_between(const Position& pos);
+
 };

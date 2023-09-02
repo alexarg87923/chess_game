@@ -72,6 +72,10 @@ Color Piece::get_team() const {
     return team;
 }
 
+bool Piece::is_king() const {
+    return (piece_name == "king");
+}
+
 std::vector<std::shared_ptr<Hitbox>> Piece::get_hitboxes() const {
     return hitboxes;
 }
