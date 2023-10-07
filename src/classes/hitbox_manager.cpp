@@ -64,20 +64,14 @@ void Hitbox_Manager::add_moves_to_state(std::shared_ptr<Piece> piece, std::vecto
 
 std::vector<std::shared_ptr<Hitbox>> Hitbox_Manager::check_hitbox(const Position& pos) const {
     std::vector<std::shared_ptr<Hitbox>> mergedResults;
-
-    if (HITBOX_STATES.empty()) {
-        return mergedResults;
-    }
+    
+    if (HITBOX_STATES.empty()) return mergedResults;
 
     for (auto &each_board : HITBOX_STATES) {
-        if (each_board.second.empty()) {
-            continue;
-        }
+        if (each_board.second.empty()) continue;
 
         auto iter = each_board.second.find(pos);
-        if (iter != each_board.second.end() && !iter->second.empty()) {
-            mergedResults.insert(mergedResults.end(), iter->second.begin(), iter->second.end());
-        }
+        if (iter != each_board.second.end() && !iter->second.empty()) mergedResults.insert(mergedResults.end(), iter->second.begin(), iter->second.end());
     }
 
     return mergedResults;

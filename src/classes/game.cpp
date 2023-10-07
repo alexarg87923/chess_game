@@ -15,7 +15,7 @@ void Game::start() {
 
     game_board.add_grid();
 
-    initialize_game();
+    initialize_pieces();
 
     // GAME LOOP
     while (window.isOpen()) {
