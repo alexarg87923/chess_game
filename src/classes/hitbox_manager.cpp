@@ -48,17 +48,17 @@ void Hitbox_Manager::remove_hitboxes_from_state(std::shared_ptr<Piece> piece_hit
 void Hitbox_Manager::add_moves_to_state(std::shared_ptr<Piece> piece, std::vector<Position> moves) {
     sf::Vector2f size = game_board.get_size_of_grid_square();
 
-    for (auto &move : moves) {
-        auto tmp = std::make_shared<Hitbox>(size, move, game_board.get_grid_square_from_map(move)->getPosition(), piece);
+    for (Position &move : moves) {
+        std::shared_ptr<Hitbox> tmp = std::make_shared<Hitbox>(size, move, game_board.get_grid_square_from_map(move)->getPosition(), piece);
 
-        if (game_board.get_piece(move)) {
+        if (move.has_piece) {
             tmp->highlight();
         } else {
             tmp->show();
         }
 
         piece->add_hitbox(tmp);
-        update_hitbox_state(piece->get_team(), move, tmp);
+        HITBOX_STATES[piece->get_team()][move].push_back(tmp);
     }
 }
 

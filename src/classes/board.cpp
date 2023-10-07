@@ -157,12 +157,7 @@ void Board::clear_hitboxes() {
     HITBOXES.clear();
 }
 
-void Board::make_hitboxes() {
-    if (!selected_piece) {
-        HITBOXES.clear();
-        return;
-    }
-
+void Board::get_hitboxes_from_piece() {
     HITBOXES = selected_piece->get_hitboxes();
 }
 

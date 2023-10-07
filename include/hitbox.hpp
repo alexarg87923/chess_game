@@ -16,12 +16,15 @@ public:
     std::shared_ptr<Piece> get_parent() const;
     sf::RectangleShape* get_hitbox() const;
     Position get_position() const;
+    void show();
+    void highlight();
 
     bool operator==(const std::shared_ptr<Hitbox>& other) const;
 
 private:
     std::shared_ptr<Piece> parent;
     std::unique_ptr<sf::RectangleShape> hitbox;
+    // sf::RectangleShape* hitbox;
     Position position;
     bool showing = false;
 };

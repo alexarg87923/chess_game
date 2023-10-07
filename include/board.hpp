@@ -21,7 +21,7 @@ public:
     void draw_board(sf::RenderWindow& window);
 
     // Hitboxes
-    void make_hitboxes();
+    void get_hitboxes_from_piece();
     void clear_hitboxes();
 
     void draw_hitboxes(sf::RenderWindow &window) const;

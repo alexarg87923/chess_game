@@ -3,7 +3,7 @@
 struct Position {
     char row;
     int col;
-
+    bool has_piece;
     // Position(char r, int c) : row(r), col(c) {}
 
     bool operator==(const Position& other) const {

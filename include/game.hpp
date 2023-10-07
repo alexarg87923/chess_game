@@ -42,8 +42,6 @@ private:
     void handle_drawing();
 
     void check_close(const sf::Event& event);
-    void check_select();
-    bool handle_move();
 };
 
 #endif

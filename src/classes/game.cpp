@@ -126,46 +126,32 @@ void Game::check_close(const sf::Event& event) {
 }
 
 void Game::listen_left_click(const sf::Event& event) {
-    if (event.type == sf::Event::MouseButtonPressed) {
-        if (event.mouseButton.button == sf::Mouse::Left) {
-            bool moved = handle_move();
+    if (event.type != sf::Event::MouseButtonPressed) return;
+    if (event.mouseButton.button != sf::Mouse::Left) return;
 
-            if (!moved) {
-                check_select();
-            }
-        }
-    }
-}
 
-void Game::check_select() {
-    if (!(game_board.get_selected_piece())) {
-        auto result = game_board.check_clicked_piece(sf::Mouse::getPosition(window));
-        if (result.has_value()) {
-            game_board.select_piece(result.value());
-        }
-    } else {
-        game_board.select_piece(nullptr);
-    }
-
-    game_board.make_hitboxes();
-}
-
-bool Game::handle_move() {
-    auto selected_piece = game_board.get_selected_piece();
+    std::shared_ptr<Piece> selected_piece = game_board.get_selected_piece();
+    
     if (selected_piece) {
-        auto result = game_board.check_clicked_hitbox(sf::Mouse::getPosition(window));
-
-        if (result.has_value()) {
-            move_handler.move_piece(selected_piece, result.value());
+        std::__1::optional<Position> clicked_hitbox = game_board.check_clicked_hitbox(sf::Mouse::getPosition(window));
+        if (clicked_hitbox.has_value()) {
+            move_handler.move_piece(selected_piece, clicked_hitbox.value());
 
             game_board.clear_hitboxes();
 
             game_board.select_piece(nullptr);
-            return 1;
+            return;
         }
     }
 
-    return 0;
+    std::optional<std::__1::shared_ptr<Piece>> clicked_piece = game_board.check_clicked_piece(sf::Mouse::getPosition(window));
+    if (clicked_piece.has_value() && clicked_piece.value() != selected_piece) {
+        game_board.select_piece(clicked_piece.value());
+        game_board.get_hitboxes_from_piece();
+        return;
+    }
+
+    game_board.select_piece(nullptr);
 }
 
 void Game::handle_drawing() {

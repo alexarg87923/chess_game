@@ -44,7 +44,7 @@ void Move_Handler::reset_hitboxes(std::shared_ptr<Piece> piece) {
 
 void Move_Handler::place_piece(const std::shared_ptr<Piece> piece) {
     Piece& p = *piece;
-    auto pos = p.get_pos(); // position to set it to
+    Position pos = p.get_pos(); // position to set it to
     
     reset_hitboxes(piece); // reset the hitboxes if there are any
 
@@ -90,30 +90,32 @@ std::vector<Position> Move_Handler::check_for_obstructions_and_valid_moves(std::
         return valid_moves;
     }
 
-    for (auto & moves_pair : moves) {
+    for (std::pair<const MoveAttributes, std::vector<std::queue<Position>>> & moves_pair : moves) {
         if (!moves_pair.second.empty()) {
-            for (auto & queue : moves_pair.second) {
+            for (std::queue<Position>& queue : moves_pair.second) {
                 std::queue<Position> move_queue;
     
                 while (!queue.empty()) {
-                    const Position& next_pos = queue.front();
-                    auto piece_opt = game_board.get_piece(next_pos);
+                    Position& curr_pos = queue.front();
+                    auto piece_opt = game_board.get_piece(curr_pos);
                     MoveAttributes move_attr = moves_pair.first;
 
-                    if (squares_between.size() == 1 && move_attr == MoveAttributes::SEARCH && !inc_piece->is_king() && is_in_squares_between(next_pos)) {
-                        valid_moves.push_back(next_pos);
+                    if (squares_between.size() == 1 && move_attr == MoveAttributes::SEARCH && !inc_piece->is_king() && is_in_squares_between(curr_pos)) {
+                        valid_moves.push_back(curr_pos);
                         queue.pop();
                     } else if (squares_between.size() == 0) {
                         if (piece_opt.has_value()) {
                             std::shared_ptr<Piece> piece = piece_opt.value();
                             Color team = inc_piece->get_team();
 
+                            curr_pos.has_piece = true;
+
                             if (piece->get_team() != team &&
                                 (move_attr == MoveAttributes::VALID_ON_ENEMY_ONLY || move_attr == MoveAttributes::SEARCH)) {
-                                valid_moves.push_back(next_pos);
+                                valid_moves.push_back(curr_pos);
                             }
 
-                            add_obstructed(next_pos, inc_piece);
+                            add_obstructed(curr_pos, inc_piece);
 
                             // This is checking for king
                             if (piece == game_board.get_king((team == BLACK ? WHITE : BLACK))) {
@@ -126,7 +128,7 @@ std::vector<Position> Move_Handler::check_for_obstructions_and_valid_moves(std::
 
                             break;
                         } else if (move_attr == MoveAttributes::OBSTRUCT_ON_OCCUPY || move_attr == MoveAttributes::SEARCH) {
-                            valid_moves.push_back(next_pos);
+                            valid_moves.push_back(curr_pos);
                             move_queue.push(queue.front());
                             queue.pop();
                         } else {
@@ -134,7 +136,7 @@ std::vector<Position> Move_Handler::check_for_obstructions_and_valid_moves(std::
                             queue.pop();
                         }
                     } else {
-                        valid_moves.push_back(next_pos);
+                        valid_moves.push_back(curr_pos);
                         move_queue.push(queue.front());
                         queue.pop();
                     }
