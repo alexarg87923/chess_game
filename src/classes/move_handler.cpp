@@ -5,22 +5,34 @@ Move_Handler::Move_Handler(Board& incoming_game_board) :
 {}
 
 void Move_Handler::move_piece(std::shared_ptr<Piece> piece, Position pos) {
-    auto position = piece->get_pos(); // get old pos
+    // auto position = piece->get_pos();
 
-    game_board.set_piece(position, nullptr); // clear the old position of the piece
+    // game_board.set_piece(position, nullptr);
 
     // game_board.set_piece(pos, piece);
 
-    reset_obstructed_at(position); // if pieces were being obstructed, now that i removed the piece from the board, i can recalculate
-    simulate_update(); // and see if the piece is still obstructed
+    // reset_obstructed_at(position);
+    // simulate_update();
 
-    if (hitbox_in_pos_of_king(piece->get_team())) {
-        game_board.set_piece(position, piece);
-    } else {
-        piece->set_piece_pos(pos); // set the configuratoin of the piece
-    }
+    // if (hitbox_in_pos_of_king(piece->get_team())) {
+    //     game_board.set_piece(position, piece);
+    // } else {
+    //     piece->set_piece_pos(pos);
+    // }
+
+    // piece->invalidate_moves();
+
+    // place_piece(piece);
+    auto position = piece->get_pos();
+
+    game_board.set_piece(position, nullptr);
+    piece->set_piece_pos(pos);
+
+    reset_obstructed_at(position);
 
     piece->invalidate_moves();
+
+    place_piece(piece);
 }
 
 void Move_Handler::reset_hitboxes(std::shared_ptr<Piece> piece) {
@@ -74,8 +86,8 @@ std::vector<Position> Move_Handler::check_for_obstructions_and_valid_moves(std::
     std::vector<Position> valid_moves;
     std::queue<Position> temp_queue;
 
-    if (squares_between.size() == 2 && !inc_piece->is_king()) {
-        return valid_moves; // return empty as only king moves are valid
+    if (squares_between.size() > 1 && !inc_piece->is_king()) {
+        return valid_moves;
     }
 
     for (auto & moves_pair : moves) {
@@ -103,7 +115,6 @@ std::vector<Position> Move_Handler::check_for_obstructions_and_valid_moves(std::
 
                             add_obstructed(next_pos, inc_piece);
 
-                            
                             // This is checking for king
                             if (piece == game_board.get_king((team == BLACK ? WHITE : BLACK))) {
                                 squares_between.push_back(move_queue);
@@ -123,6 +134,7 @@ std::vector<Position> Move_Handler::check_for_obstructions_and_valid_moves(std::
                             queue.pop();
                         }
                     } else {
+                        valid_moves.push_back(next_pos);
                         move_queue.push(queue.front());
                         queue.pop();
                     }

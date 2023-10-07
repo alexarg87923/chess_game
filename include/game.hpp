@@ -36,7 +36,7 @@ private:
 
     void handle_events();
     void handle_frame_rate(const float& frameRate, sf::Clock& clock);
-
+    void initialize_game();
     void initialize_pieces();
     void listen_left_click(const sf::Event& event);
     void handle_drawing();

@@ -11,7 +11,7 @@ class Piece;
 
 class Hitbox {
 public:
-    Hitbox(sf::Vector2f incoming_size, const Position& incoming_pos, sf::Vector2f incoming_position, sf::Color incoming_color, std::shared_ptr<Piece> incoming_parent);
+    Hitbox(sf::Vector2f incoming_size, const Position& incoming_pos, sf::Vector2f incoming_position, std::shared_ptr<Piece> incoming_parent);
 
     std::shared_ptr<Piece> get_parent() const;
     sf::RectangleShape* get_hitbox() const;
@@ -23,6 +23,7 @@ private:
     std::shared_ptr<Piece> parent;
     std::unique_ptr<sf::RectangleShape> hitbox;
     Position position;
+    bool showing = false;
 };
 
 #endif

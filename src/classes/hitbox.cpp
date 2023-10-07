@@ -2,13 +2,13 @@
 
 #include "piece.hpp"
 
-Hitbox::Hitbox(sf::Vector2f incoming_size, const Position& incoming_pos, sf::Vector2f incoming_position, sf::Color incoming_color, std::shared_ptr<Piece> incoming_parent){
+Hitbox::Hitbox(sf::Vector2f incoming_size, const Position& incoming_pos, sf::Vector2f incoming_position, std::shared_ptr<Piece> incoming_parent){
     parent = incoming_parent;
     position = incoming_pos;
 
-    hitbox = std::make_unique<sf::RectangleShape>(incoming_size);
 
-    hitbox->setFillColor(incoming_color);
+    hitbox = std::make_unique<sf::RectangleShape>();
+    hitbox->setFillColor(sf::Color::Transparent);
     hitbox->setPosition(incoming_position);
 }
 

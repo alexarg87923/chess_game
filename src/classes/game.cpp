@@ -15,7 +15,7 @@ void Game::start() {
 
     game_board.add_grid();
 
-    initialize_pieces();
+    initialize_game();
 
     // GAME LOOP
     while (window.isOpen()) {
@@ -56,6 +56,48 @@ void Game::initialize_pieces() {
     // move_handler.place_piece(std::make_shared<Rook>('H', 4, WHITE, size_of_grid_square));
     // move_handler.place_piece(std::make_shared<Knight>('G', 1, WHITE, size_of_grid_square));
 }
+
+void Game::initialize_game() {
+    auto size_of_grid_square = game_board.get_size_of_grid_square();
+
+    // Kings
+    auto white_king = std::make_shared<King>('E', 1, WHITE, size_of_grid_square);
+    move_handler.place_piece(white_king);
+    game_board.set_king(white_king);
+
+    auto black_king = std::make_shared<King>('E', 8, BLACK, size_of_grid_square);
+    move_handler.place_piece(black_king);
+    game_board.set_king(black_king);
+
+    // Queens
+    move_handler.place_piece(std::make_shared<Queen>('D', 1, WHITE, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Queen>('D', 8, BLACK, size_of_grid_square));
+
+    // Bishops
+    move_handler.place_piece(std::make_shared<Bishop>('C', 1, WHITE, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Bishop>('F', 1, WHITE, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Bishop>('C', 8, BLACK, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Bishop>('F', 8, BLACK, size_of_grid_square));
+
+    // Knights
+    move_handler.place_piece(std::make_shared<Knight>('B', 1, WHITE, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Knight>('G', 1, WHITE, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Knight>('B', 8, BLACK, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Knight>('G', 8, BLACK, size_of_grid_square));
+
+    // Rooks
+    move_handler.place_piece(std::make_shared<Rook>('A', 1, WHITE, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Rook>('H', 1, WHITE, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Rook>('A', 8, BLACK, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Rook>('H', 8, BLACK, size_of_grid_square));
+
+    // Pawns
+    for (char col = 'A'; col <= 'H'; col++) {
+        move_handler.place_piece(std::make_shared<Pawn>(col, 2, WHITE, size_of_grid_square));
+        move_handler.place_piece(std::make_shared<Pawn>(col, 7, BLACK, size_of_grid_square));
+    }
+}
+
 
 void Game::handle_frame_rate(const float& FRAME_RATE, sf::Clock& clock) {
     sf::Time elapsed = clock.restart();
