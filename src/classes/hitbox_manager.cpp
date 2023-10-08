@@ -11,16 +11,12 @@ Hitbox_Manager::~Hitbox_Manager(){}
 std::vector<std::shared_ptr<Hitbox>> Hitbox_Manager::check_hitbox(Color team, char row, int col) const {
     auto team_board = HITBOX_STATES.find(team);
 
-    if (team_board == HITBOX_STATES.end()) {
-        return {};
-    }
+    if (team_board == HITBOX_STATES.end()) return {};
 
     auto &board = team_board->second;
     auto hitbox = board.find({row, col});
 
-    if (hitbox != board.end()) {
-        return hitbox->second;
-    }
+    if (hitbox != board.end()) return hitbox->second;
 
     return {};
 }

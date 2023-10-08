@@ -27,7 +27,7 @@ private:
     std::queue<std::shared_ptr<Piece>> deferred_pieces;
     std::set<std::shared_ptr<Piece>> processed_pieces;
 
-    std::vector<std::queue<Position>> squares_between;
+    std::map<Color, std::vector<std::queue<Position>>> squares_between;
 
     std::vector<Position> check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::map<MoveAttributes, std::vector<std::queue<Position>>> moves);
     void reset_hitboxes(std::shared_ptr<Piece> piece);
@@ -44,6 +44,6 @@ private:
 
     void simulate_update();
 
-    bool is_in_squares_between(const Position& pos);
+    bool is_in_squares_between(const Position& pos, Color team);
 
 };

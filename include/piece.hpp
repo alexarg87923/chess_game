@@ -13,7 +13,8 @@
 enum MoveAttributes {
     OBSTRUCT_ON_OCCUPY,  // Move is obstructed if the square is occupied.
     VALID_ON_ENEMY_ONLY,     // Move is valid if the square has an enemy piece
-    SEARCH    // Move is valid if the square is empty.
+    SEARCH,    // Move is valid if the square is empty.
+    KING // Invalid if hitbox unless enemy on it
 };
 
 

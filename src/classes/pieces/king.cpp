@@ -12,7 +12,7 @@ std::map<MoveAttributes, std::vector<std::queue<Position>>> King::calc_moves(con
     const int ZERO_OFFSET = 0;
 
     std::map<MoveAttributes, std::vector<std::queue<Position>>> moves;
-    moves[MoveAttributes::SEARCH].emplace_back();
+    moves[MoveAttributes::KING].emplace_back();
     Position pos_copy = pos;
     int direction = 0;
     
@@ -23,7 +23,7 @@ std::map<MoveAttributes, std::vector<std::queue<Position>>> King::calc_moves(con
                 if (validate_in_bounds(new_pos)) {
                     std::queue<Position> tmp;
                     tmp.push(new_pos);
-                    moves[MoveAttributes::SEARCH].push_back(tmp);
+                    moves[MoveAttributes::KING].push_back(tmp);
                 }
             }
         }
