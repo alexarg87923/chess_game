@@ -1,19 +1,19 @@
 #include "piece.hpp"
 
-#include "hitbox.hpp"
+// #include "hitbox.hpp"
 
 Piece::Piece(){}
 Piece::~Piece(){}
 
-Piece::Piece(char row, int col, Color team_color, const std::string& name, sf::Vector2f size) :
-    Piece(Position{row, col}, team_color, name, size)
+Piece::Piece(char row, int col, Color team_color, const PIECE& piece, sf::Vector2f size, const std::string& name) :
+    Piece(Position{row, col}, team_color, piece, size, name)
 {}
 
-Piece::Piece(const Position& pos, Color team_color, const std::string& name, sf::Vector2f size) {
+Piece::Piece(const Position& pos, Color team_color, const PIECE& piece, sf::Vector2f size, const std::string& name) {
     piece_rect_obj = std::make_unique<sf::RectangleShape>(size);
     piece_rect_obj->setTexture(load_sprite(name, team_color));
 
-    piece_name = name;
+    piece_type = piece;
     team = team_color;
     piece_position = pos;
 }
@@ -23,7 +23,7 @@ bool Piece::operator==(const Piece& other) const {
     if (team != other.team) return false;
 
     // Comparing the names
-    if (piece_name != other.piece_name) return false;
+    if (piece_type != other.piece_type) return false;
 
     // Comparing Position objects
     if (piece_position != other.piece_position) return false;
@@ -34,6 +34,10 @@ bool Piece::operator==(const Piece& other) const {
 
 void Piece::draw(sf::RenderTarget& target) const {
     target.draw(*piece_rect_obj);
+}
+
+PIECE Piece::get_piece_type() {
+    return piece_type;
 }
 
 Position Piece::get_pos() const {
@@ -73,7 +77,7 @@ Color Piece::get_team() const {
 }
 
 bool Piece::is_king() const {
-    return (piece_name == "king");
+    return (piece_type == PIECE::King);
 }
 
 std::vector<std::shared_ptr<Hitbox>> Piece::get_hitboxes() const {
@@ -92,15 +96,15 @@ void Piece::invalidate_moves() {
     are_moves_valid = false;
 }
 
-const std::map<MoveAttributes, std::vector<std::queue<Position>>>& Piece::get_moves() const {
+const std::vector<std::queue<std::shared_ptr<Hitbox>>>& Piece::get_moves() const {
     return cached_moves;
 }
 
-std::map<MoveAttributes, std::vector<std::queue<Position>>>& Piece::get_moves_mutable() {
+std::vector<std::queue<std::shared_ptr<Hitbox>>>& Piece::get_moves_mutable() {
     return cached_moves;
 }
 
-void Piece::cache_moves(const std::map<MoveAttributes, std::vector<std::queue<Position>>>& moves) {
+void Piece::cache_moves(const std::vector<std::queue<std::shared_ptr<Hitbox>>>& moves) {
     cached_moves = moves;
     are_moves_valid = true;
 }

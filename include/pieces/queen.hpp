@@ -1,8 +1,4 @@
-#ifndef QUEEN_H
-#define QUEEN_H
-
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
+#pragma once
 
 #include "pieces/bishop.hpp"
 #include "pieces/rook.hpp"
@@ -15,7 +11,5 @@ public:
     Queen(char row, int col, Color team_color, sf::Vector2f size);
     Queen(const Position& pos, Color team_color, sf::Vector2f size);
 
-    std::map<MoveAttributes, std::vector<std::queue<Position>>> calc_moves(const Position& pos) const override;
+    std::vector<std::queue<std::shared_ptr<Hitbox>>> calc_moves(const Position& pos) override;
 };
-
-#endif

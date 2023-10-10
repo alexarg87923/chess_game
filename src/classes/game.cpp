@@ -6,8 +6,6 @@ Game::Game() :
     window(sf::RenderWindow(sf::VideoMode(2560, 1606), "Chesst Game")),
     game_board(Board(window.getSize())),
     move_handler(game_board)
-    // board_hitbox_state(Hitbox_Manager(game_board)),
-    // move_handler(game_board, board_hitbox_state)
 {}
 
 void Game::start() {
@@ -31,7 +29,7 @@ void Game::start() {
 }
 
 void Game::initialize_pieces() {
-    auto size_of_grid_square = game_board.get_size_of_grid_square();
+    auto size_of_grid_square = SIZE;
 
     auto white_king = std::make_shared<King>('E', 1, WHITE, size_of_grid_square);
     move_handler.place_piece(white_king);
@@ -58,7 +56,7 @@ void Game::initialize_pieces() {
 }
 
 void Game::initialize_game() {
-    auto size_of_grid_square = game_board.get_size_of_grid_square();
+    auto size_of_grid_square = SIZE;
 
     // Kings
     auto white_king = std::make_shared<King>('E', 1, WHITE, size_of_grid_square);

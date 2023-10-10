@@ -1,5 +1,4 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Event.hpp>
@@ -44,4 +43,3 @@ private:
     void check_close(const sf::Event& event);
 };
 
-#endif

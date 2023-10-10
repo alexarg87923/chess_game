@@ -21,10 +21,6 @@ std::vector<std::shared_ptr<Hitbox>> Hitbox_Manager::check_hitbox(Color team, ch
     return {};
 }
 
-void Hitbox_Manager::update_hitbox_state(Color team, char row, int col, std::shared_ptr<Hitbox> value) {
-    HITBOX_STATES[team][{row, col}].push_back(value);
-}
-
 void Hitbox_Manager::remove_hitboxes_from_state(std::shared_ptr<Piece> piece_hitbox_to_update) {
     auto& teamHitboxes = HITBOX_STATES[piece_hitbox_to_update->get_team()];
 
@@ -41,21 +37,26 @@ void Hitbox_Manager::remove_hitboxes_from_state(std::shared_ptr<Piece> piece_hit
     }
 }
 
-void Hitbox_Manager::add_moves_to_state(std::shared_ptr<Piece> piece, std::vector<Position> moves) {
-    sf::Vector2f size = game_board.get_size_of_grid_square();
+void Hitbox_Manager::add_moves_to_state(std::shared_ptr<Piece> piece, std::vector<std::queue<std::shared_ptr<Hitbox>>> moves) {
+    Color team = piece->get_team();
 
-    for (Position &move : moves) {
-        std::shared_ptr<Hitbox> tmp = std::make_shared<Hitbox>(size, move, game_board.get_grid_square_from_map(move)->getPosition(), piece);
-
-        if (move.has_piece) {
-            tmp->highlight();
-        } else {
-            tmp->show();
+    for (auto& queue : moves) {
+        if (queue.empty()) continue;
+        while(!queue.empty()) {
+            std::shared_ptr<Hitbox> curr_hitbox = queue.front();
+            queue.pop();
+            HITBOX_STATES[team][curr_hitbox->get_position()].push_back(curr_hitbox);
+            piece->add_hitbox(curr_hitbox);
         }
-
-        piece->add_hitbox(tmp);
-        HITBOX_STATES[piece->get_team()][move].push_back(tmp);
     }
+}
+
+/*
+    OVERLOADED FUNCTIONS
+*/
+
+std::vector<std::shared_ptr<Hitbox>> Hitbox_Manager::check_hitbox(Color team, const Position& key) const {
+    return check_hitbox(team, key.row, key.col);
 }
 
 std::vector<std::shared_ptr<Hitbox>> Hitbox_Manager::check_hitbox(const Position& pos) const {
@@ -71,16 +72,4 @@ std::vector<std::shared_ptr<Hitbox>> Hitbox_Manager::check_hitbox(const Position
     }
 
     return mergedResults;
-}
-
-/*
-    OVERLOADED FUNCTIONS
-*/
-
-std::vector<std::shared_ptr<Hitbox>> Hitbox_Manager::check_hitbox(Color team, const Position& key) const {
-    return check_hitbox(team, key.row, key.col);
-}
-
-void Hitbox_Manager::update_hitbox_state(Color team, const Position& pos, std::shared_ptr<Hitbox> value) {
-    HITBOX_STATES[team][pos].push_back(value);
 }

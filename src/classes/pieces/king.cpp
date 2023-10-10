@@ -4,30 +4,32 @@ King::King(){}
 King::~King(){}
 
 King::King(const Position& pos, Color team_color, sf::Vector2f size) : King(pos.row, pos.col, team_color, size) {}
-King::King(char row, int col, Color team_color, sf::Vector2f size) : Piece(row, col, team_color, "king", size) {}
+King::King(char row, int col, Color team_color, sf::Vector2f size) : Piece(row, col, team_color, PIECE::King, size, "king") {}
 
-std::map<MoveAttributes, std::vector<std::queue<Position>>> King::calc_moves(const Position& pos) const {
+std::vector<std::queue<std::shared_ptr<Hitbox>>> King::calc_moves(const Position& pos) {
     const int RANGE_START = -1;
     const int RANGE_END = 2;
     const int ZERO_OFFSET = 0;
 
-    std::map<MoveAttributes, std::vector<std::queue<Position>>> moves;
-    moves[MoveAttributes::KING].emplace_back();
+    std::vector<std::queue<std::shared_ptr<Hitbox>>> moves;
+    moves.emplace_back();
     Position pos_copy = pos;
     int direction = 0;
     
+    std::queue<std::shared_ptr<Hitbox>> q;
+
     for (int i = RANGE_START; i < RANGE_END; i++) {
         for (int j = RANGE_START; j < RANGE_END; j++) {
-            Position new_pos = {static_cast<char>(pos_copy.row + i), pos_copy.col + j};
+            Position new_pos{static_cast<char>(pos_copy.row + i), pos_copy.col + j};
             if (!(i == ZERO_OFFSET && j == ZERO_OFFSET)) {
                 if (validate_in_bounds(new_pos)) {
-                    std::queue<Position> tmp;
-                    tmp.push(new_pos);
-                    moves[MoveAttributes::KING].push_back(tmp);
+                    q.push(std::make_shared<Hitbox>(new_pos, COORDINATES[new_pos], this));
                 }
             }
         }
     } 
+
+    moves.push_back(q);
 
     return moves;
 }

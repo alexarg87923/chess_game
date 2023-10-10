@@ -4,10 +4,10 @@ struct Offset {
     int col;
 };
 
-enum MovementType {
-    STRAIGHT,
-    DIAGONAL
-};
+// enum MovementType {
+//     STRAIGHT,
+//     DIAGONAL
+// };
 
 std::vector<Offset> INITIAL_OFFSETS = {
     {0, 1},   // Placholder for straight move
@@ -19,11 +19,11 @@ Pawn::Pawn(){}
 Pawn::~Pawn(){}
 
 Pawn::Pawn(const Position& pos, Color team_color, sf::Vector2f size) : Pawn(pos.row, pos.col, team_color, size) {}
-Pawn::Pawn(char row, int col, Color team_color, sf::Vector2f size) : Piece(row, col, team_color, "pawn", size) {}
+Pawn::Pawn(char row, int col, Color team_color, sf::Vector2f size) : Piece(row, col, team_color, PIECE::Pawn, size, "pawn") {}
 
-std::map<MoveAttributes, std::vector<std::queue<Position>>> Pawn::calc_moves(const Position& pos) const {
-    std::map<MoveAttributes, std::vector<std::queue<Position>>> moves;
-    moves[MoveAttributes::OBSTRUCT_ON_OCCUPY].push_back(std::queue<Position>());
+std::vector<std::queue<std::shared_ptr<Hitbox>>> Pawn::calc_moves(const Position& pos) {
+    std::vector<std::queue<std::shared_ptr<Hitbox>>> moves;
+    moves.push_back(std::queue<std::shared_ptr<Hitbox>>());
 
     int direction = (team == WHITE) ? 1 : -1; // Assuming WHITE should move in the positive direction and BLACK in the negative
 
@@ -41,14 +41,13 @@ std::map<MoveAttributes, std::vector<std::queue<Position>>> Pawn::calc_moves(con
         int newX = pos.row + offset.row;
         int newY = pos.col + offset.col;
         if (validate_in_bounds(newX, newY)) {
-
+            Position pos{static_cast<char>(newX), newY};
             if (offset.row != 0) {
-                std::queue<Position> q;
-                q.push(Position{static_cast<char>(newX), newY});
-
-                moves[MoveAttributes::VALID_ON_ENEMY_ONLY].push_back(q);
+                std::queue<std::shared_ptr<Hitbox>> q;
+                q.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], this));
+                moves.push_back(q);
             } else {
-                moves[MoveAttributes::OBSTRUCT_ON_OCCUPY][STRAIGHT].push(Position{static_cast<char>(newX), newY});
+                moves[STRAIGHT].push(std::make_shared<Hitbox>(pos, COORDINATES[pos], this));
             }
         }
     }

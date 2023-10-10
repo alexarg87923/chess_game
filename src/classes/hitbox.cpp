@@ -2,26 +2,29 @@
 
 #include "piece.hpp"
 
-Hitbox::Hitbox(sf::Vector2f incoming_size, const Position& incoming_pos, sf::Vector2f incoming_position, std::shared_ptr<Piece> incoming_parent){
+Hitbox::Hitbox(const Position& incoming_pos, sf::Vector2f incoming_position, Piece* incoming_parent){
     parent = incoming_parent;
     position = incoming_pos;
 
-    // hitbox = new sf::RectangleShape();
     hitbox = std::make_unique<sf::RectangleShape>();
-    hitbox->setSize(incoming_size);
-    hitbox->setFillColor(sf::Color::Transparent);
+    hitbox->setSize(sf::Vector2f(0, 0));
+    hitbox->setFillColor(sf::Color::Blue);
     hitbox->setPosition(incoming_position);
 }
 
+void Hitbox::hide() {
+    hitbox->setSize(sf::Vector2f(0, 0));
+}
+
 void Hitbox::show() {
-    hitbox->setFillColor(sf::Color::Blue);
+    hitbox->setSize(SIZE);
 }
 
 void Hitbox::highlight() {
     hitbox->setFillColor(sf::Color(0, 0, 255, 128));
 }
 
-std::shared_ptr<Piece> Hitbox::get_parent() const {
+Piece* Hitbox::get_parent() const {
     return parent;
 }
 

@@ -1,11 +1,6 @@
-#ifndef ROOK_H
-#define ROOK_H
-
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
+#pragma once
 
 #include "piece.hpp"
-#include "constants.hpp"
 
 class Rook : virtual public Piece {
 public:
@@ -15,7 +10,5 @@ public:
     Rook(char row, int col, Color team_color, sf::Vector2f size);
     Rook(const Position& pos, Color team_color, sf::Vector2f size);
 
-    virtual std::map<MoveAttributes, std::vector<std::queue<Position>>> calc_moves(const Position& pos) const;
+    virtual std::vector<std::queue<std::shared_ptr<Hitbox>>> calc_moves(const Position& pos);
 };
-
-#endif

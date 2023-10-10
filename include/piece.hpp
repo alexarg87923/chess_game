@@ -1,5 +1,4 @@
-#ifndef PIECE_H
-#define PIECE_H
+#pragma once
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -10,26 +9,32 @@
 #include <map>
 #include <vector>
 
-enum MoveAttributes {
-    OBSTRUCT_ON_OCCUPY,  // Move is obstructed if the square is occupied.
-    VALID_ON_ENEMY_ONLY,     // Move is valid if the square has an enemy piece
-    SEARCH,    // Move is valid if the square is empty.
-    KING // Invalid if hitbox unless enemy on it
+enum class PIECE {
+    Pawn,
+    King,
+    Knight,
+    Rook,
+    Queen,
+    Bishop
 };
 
+enum MovementType {
+    STRAIGHT,
+    DIAGONAL
+};
 
-#include "types.hpp"
+#include "constants.hpp"
 #include "helper.hpp"
-
-class Hitbox;
+#include "hitbox.hpp"
+// class Hitbox;
 
 class Piece {
 public:
     Piece();
     ~Piece();
     
-    Piece(char row, int col, Color team_color, const std::string& name, sf::Vector2f size);
-    Piece(const Position& pos, Color team_color, const std::string& name, sf::Vector2f size);
+    Piece(char row, int col, Color team_color, const PIECE& piece, sf::Vector2f size, const std::string& name);
+    Piece(const Position& pos, Color team_color, const PIECE& piece, sf::Vector2f size,  const std::string& name);
 
     Position get_pos() const;
     void draw(sf::RenderTarget& target) const;
@@ -43,14 +48,15 @@ public:
     void set_piece_pos(Position pos);
     void set_position(sf::Vector2f pos);
 
-    virtual std::map<MoveAttributes, std::vector<std::queue<Position>>> calc_moves(const Position& pos) const = 0;
+    PIECE get_piece_type();
+    virtual std::vector<std::queue<std::shared_ptr<Hitbox>>> calc_moves(const Position& pos) = 0;
 
     bool operator==(const Piece& other) const;
 
     bool moves_are_valid() const;
-    void cache_moves(const std::map<MoveAttributes, std::vector<std::queue<Position>>>& moves);
-    std::map<MoveAttributes, std::vector<std::queue<Position>>>& get_moves_mutable();
-    const std::map<MoveAttributes, std::vector<std::queue<Position>>>& get_moves() const;
+    void cache_moves(const std::vector<std::queue<std::shared_ptr<Hitbox>>>& moves);
+    std::vector<std::queue<std::shared_ptr<Hitbox>>>& get_moves_mutable();
+    const std::vector<std::queue<std::shared_ptr<Hitbox>>>& get_moves() const;
     void invalidate_moves();
 
     bool is_king() const;
@@ -58,10 +64,10 @@ protected:
     std::unique_ptr<sf::RectangleShape> piece_rect_obj;
     Color team;
     Position piece_position;
-    std::vector<std::shared_ptr<Hitbox>> hitboxes;
-    std::string piece_name;
+    PIECE piece_type;
 
-    std::map<MoveAttributes, std::vector<std::queue<Position>>> cached_moves;
+    std::vector<std::shared_ptr<Hitbox>> hitboxes;
+    std::vector<std::queue<std::shared_ptr<Hitbox>>> cached_moves;
 
     bool are_moves_valid = false;
     
@@ -71,4 +77,3 @@ protected:
     sf::Texture* load_sprite(const std::string& name, Color team_color) const;
 };
 
-#endif

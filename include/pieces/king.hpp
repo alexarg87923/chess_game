@@ -1,8 +1,4 @@
-#ifndef KING_H
-#define KING_H
-
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
+#pragma once
 
 #include "piece.hpp"
 
@@ -14,10 +10,10 @@ public:
     King(char row, int col, Color team_color, sf::Vector2f size);
     King(const Position& pos, Color team_color, sf::Vector2f size);
 
-    std::map<MoveAttributes, std::vector<std::queue<Position>>> calc_moves(const Position& pos) const override;
+    std::vector<std::queue<std::shared_ptr<Hitbox>>> calc_moves(const Position& pos) override;
 
 private:
     bool already_moved = false;
 };
 
-#endif
+

@@ -1,8 +1,4 @@
-#ifndef KNIGHT_H
-#define KNIGHT_H
-
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
+#pragma once
 
 #include "piece.hpp"
 
@@ -14,7 +10,6 @@ public:
     Knight(char row, int col, Color team_color, sf::Vector2f size);
     Knight(const Position &pos, Color team_color, sf::Vector2f size);
 
-    std::map<MoveAttributes, std::vector<std::queue<Position>>> calc_moves(const Position& pos) const override;
+    std::vector<std::queue<std::shared_ptr<Hitbox>>> calc_moves(const Position& pos) override;
 };
 
-#endif
