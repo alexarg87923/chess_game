@@ -80,10 +80,11 @@ std::vector<std::queue<std::shared_ptr<Hitbox>>> Move_Handler::check_cache(Posit
 
 void Move_Handler::check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::vector<std::queue<std::shared_ptr<Hitbox>>> moves) {
     PIECE piece = inc_piece->get_piece_type();
-
-    auto pawn_logic = [this](std::vector<std::queue<std::shared_ptr<Hitbox>>>& moves) {
-        auto processMoves = [this](std::queue<std::shared_ptr<Hitbox>>& queue, bool isDiagonal) {
+    auto pawn_logic = [inc_piece, this](std::vector<std::queue<std::shared_ptr<Hitbox>>>& moves) {
+        auto processMoves = [inc_piece, this](std::queue<std::shared_ptr<Hitbox>>& queue, bool isDiagonal) {
+            Color team = inc_piece->get_team();
             bool continueChecking = true;
+
             while (!queue.empty() && continueChecking) {
                 std::shared_ptr<Hitbox> curr_hitbox = queue.front();
                 queue.pop();
@@ -91,6 +92,7 @@ void Move_Handler::check_for_obstructions_and_valid_moves(std::shared_ptr<Piece>
                 std::optional<std::shared_ptr<Piece>> piece_opt = game_board.get_piece(curr_hitbox->get_position());
                 if (isDiagonal) {
                     if (piece_opt.has_value()) {
+                        curr_hitbox->show();
                         curr_hitbox->highlight();
                     }
                 } else {
@@ -109,47 +111,74 @@ void Move_Handler::check_for_obstructions_and_valid_moves(std::shared_ptr<Piece>
         processMoves(straight, false);
     };
     
-    auto bishop_queen_rook_logic = [this](std::vector<std::queue<std::shared_ptr<Hitbox>>>& moves) {
+    auto bishop_queen_rook_logic = [inc_piece, this](std::vector<std::queue<std::shared_ptr<Hitbox>>>& moves) {
+        Color team = inc_piece->get_team();
+
         for (auto& queue : moves) {
             while(!queue.empty()) {
                 std::shared_ptr<Hitbox> curr_hitbox = queue.front();
                 queue.pop();
                 std::optional<std::__1::shared_ptr<Piece>> piece_opt = game_board.get_piece(curr_hitbox->get_position());
                 if (piece_opt.has_value()) {
-                    curr_hitbox->highlight();
+                    if (piece_opt.value()->get_team() != team) {
+                        curr_hitbox->show();
+                        curr_hitbox->highlight();
+                    } else {
+                        curr_hitbox->hide();
+                    }
                     break;
-                }
+                } 
 
                 curr_hitbox->show();
             }
         }
     };
-    auto knight_logic = [this](std::vector<std::queue<std::shared_ptr<Hitbox>>>& moves) {
+
+    auto knight_logic = [this, inc_piece](std::vector<std::queue<std::shared_ptr<Hitbox>>>& moves) {
+        Color team = inc_piece->get_team();
+
         for (auto& queue : moves) {
             while(!queue.empty()) {
                 std::shared_ptr<Hitbox> curr_hitbox = queue.front();
                 queue.pop();
                 std::optional<std::__1::shared_ptr<Piece>> piece_opt = game_board.get_piece(curr_hitbox->get_position());
                 if (piece_opt.has_value()) {
-                    curr_hitbox->highlight();
+                    if (piece_opt.value()->get_team() != team) {
+                        curr_hitbox->show();
+                        curr_hitbox->highlight();
+                    } else {
+                        curr_hitbox->hide();
+                    }
                 }
+                curr_hitbox->show();
             }
         }
     };
+
     auto king_logic = [this, inc_piece](std::vector<std::queue<std::shared_ptr<Hitbox>>>& moves) {
+        Color team = inc_piece->get_team();
+
         for (auto& queue : moves) {
+            if (queue.empty()) continue;
+ 
             while(!queue.empty()) {
                 std::shared_ptr<Hitbox> curr_hitbox = queue.front();
                 queue.pop();
 
-                if (hitbox_manager.check_hitbox((inc_piece->get_team() == Color::BLACK) ? Color::WHITE : Color::BLACK, curr_hitbox->get_position()).empty()) {
+                if (hitbox_manager.check_hitbox((team == Color::BLACK) ? Color::WHITE : Color::BLACK, curr_hitbox->get_position()).empty()) {
                     std::optional<std::__1::shared_ptr<Piece>> piece_opt = game_board.get_piece(curr_hitbox->get_position());
                     if (piece_opt.has_value()) {
-                        curr_hitbox->highlight();
+                        if (piece_opt.value()->get_team() != team) {
+                            curr_hitbox->show();
+                            curr_hitbox->highlight();
+                        } else {
+                            curr_hitbox->hide();
+                        }
                     } else {
                         curr_hitbox->show();
                     }
                 }
+
             }
         }
     };
