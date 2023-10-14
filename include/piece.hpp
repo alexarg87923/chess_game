@@ -31,7 +31,7 @@ enum MovementType {
 class Piece {
 public:
     Piece();
-    ~Piece();
+    virtual ~Piece() = default;
     
     Piece(char row, int col, Color team_color, const PIECE& piece, sf::Vector2f size, const std::string& name);
     Piece(const Position& pos, Color team_color, const PIECE& piece, sf::Vector2f size,  const std::string& name);
@@ -41,9 +41,6 @@ public:
     sf::RectangleShape* get_piece() const;
     Color get_team() const;
 
-    std::vector<std::shared_ptr<Hitbox>> get_hitboxes() const;
-    void clear_hitboxes();
-    void add_hitbox(std::shared_ptr<Hitbox> hitbox);
 
     void set_piece_pos(Position pos);
     void set_position(sf::Vector2f pos);
@@ -53,12 +50,19 @@ public:
 
     bool operator==(const Piece& other) const;
 
-    bool moves_are_valid() const;
+    void clear_hitboxes();
+    void add_hitbox(std::shared_ptr<Hitbox> hitbox);
+    bool hitboxes_are_valid() const;
+    const std::vector<std::shared_ptr<Hitbox>>& get_hitboxes() const;
+    std::vector<std::shared_ptr<Hitbox>>& get_hitboxes_mutable();
+    
     void cache_moves(const std::vector<std::queue<std::shared_ptr<Hitbox>>>& moves);
-    std::vector<std::queue<std::shared_ptr<Hitbox>>>& get_moves_mutable();
-    const std::vector<std::queue<std::shared_ptr<Hitbox>>>& get_moves() const;
+    std::vector<std::queue<std::shared_ptr<Hitbox>>>& get_cache_mutable();
+    const std::vector<std::queue<std::shared_ptr<Hitbox>>>& get_cache() const;
     void invalidate_moves();
 
+    void process();
+    bool is_being_processed();
     bool is_king() const;
 protected:
     std::unique_ptr<sf::RectangleShape> piece_rect_obj;
@@ -69,8 +73,9 @@ protected:
     std::vector<std::shared_ptr<Hitbox>> hitboxes;
     std::vector<std::queue<std::shared_ptr<Hitbox>>> cached_moves;
 
+    bool being_processed = false;
     bool are_moves_valid = false;
-    
+
     virtual bool validate_in_bounds(char row, int col) const;
     virtual bool validate_in_bounds(const Position& pos) const;
 

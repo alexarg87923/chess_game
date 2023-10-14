@@ -3,7 +3,6 @@
 // #include "hitbox.hpp"
 
 Piece::Piece(){}
-Piece::~Piece(){}
 
 Piece::Piece(char row, int col, Color team_color, const PIECE& piece, sf::Vector2f size, const std::string& name) :
     Piece(Position{row, col}, team_color, piece, size, name)
@@ -16,6 +15,14 @@ Piece::Piece(const Position& pos, Color team_color, const PIECE& piece, sf::Vect
     piece_type = piece;
     team = team_color;
     piece_position = pos;
+}
+
+bool Piece::is_being_processed() {
+    return being_processed;
+}
+
+void Piece::process() {
+    being_processed = !being_processed;
 }
 
 bool Piece::operator==(const Piece& other) const {
@@ -80,10 +87,6 @@ bool Piece::is_king() const {
     return (piece_type == PIECE::King);
 }
 
-std::vector<std::shared_ptr<Hitbox>> Piece::get_hitboxes() const {
-    return hitboxes;
-}
-
 void Piece::clear_hitboxes() {
     hitboxes.clear();
 }
@@ -96,11 +99,11 @@ void Piece::invalidate_moves() {
     are_moves_valid = false;
 }
 
-const std::vector<std::queue<std::shared_ptr<Hitbox>>>& Piece::get_moves() const {
+const std::vector<std::queue<std::shared_ptr<Hitbox>>>& Piece::get_cache() const {
     return cached_moves;
 }
 
-std::vector<std::queue<std::shared_ptr<Hitbox>>>& Piece::get_moves_mutable() {
+std::vector<std::queue<std::shared_ptr<Hitbox>>>& Piece::get_cache_mutable() {
     return cached_moves;
 }
 
@@ -109,8 +112,15 @@ void Piece::cache_moves(const std::vector<std::queue<std::shared_ptr<Hitbox>>>& 
     are_moves_valid = true;
 }
 
-bool Piece::moves_are_valid() const {
+bool Piece::hitboxes_are_valid() const {
     return are_moves_valid;
+}
+
+const std::vector<std::shared_ptr<Hitbox>>& Piece::get_hitboxes() const {
+    return hitboxes;
+}
+std::vector<std::shared_ptr<Hitbox>>& Piece::get_hitboxes_mutable() {
+    return hitboxes;
 }
 
 

@@ -66,8 +66,8 @@ void Move_Handler::place_piece(const std::shared_ptr<Piece> piece) {
 std::vector<std::queue<std::shared_ptr<Hitbox>>> Move_Handler::check_cache(Position pos, std::shared_ptr<Piece> piece) {
     Piece& p = *piece;
 
-    if (p.moves_are_valid()) {
-        return p.get_moves();
+    if (p.hitboxes_are_valid()) {
+        return p.get_cache();
     } else {
         std::vector<std::queue<std::shared_ptr<Hitbox>>> all_moves = p.calc_moves(pos);
         p.cache_moves(all_moves);

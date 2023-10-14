@@ -39,8 +39,9 @@ void Game::initialize_pieces() {
     move_handler.place_piece(black_king);
     game_board.set_king(black_king);
 
-    move_handler.place_piece(std::make_shared<Queen>('E', 4, BLACK, size_of_grid_square));
-    move_handler.place_piece(std::make_shared<Bishop>('G', 1, WHITE, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Bishop>('A', 1, WHITE, size_of_grid_square));
+    move_handler.place_piece(std::make_shared<Queen>('E', 5, BLACK, size_of_grid_square));
+    
 
     // move_handler.place_piece(std::make_shared<Pawn>('A', 1, WHITE, size_of_grid_square));
 
