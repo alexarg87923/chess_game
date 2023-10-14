@@ -25,6 +25,9 @@ std::vector<std::queue<std::shared_ptr<Hitbox>>> Pawn::calc_moves(const Position
     std::vector<std::queue<std::shared_ptr<Hitbox>>> moves;
     moves.push_back(std::queue<std::shared_ptr<Hitbox>>());
 
+    std::shared_ptr<Pawn> self = std::static_pointer_cast<Pawn>(shared_from_this());
+    std::weak_ptr<Piece> weak_self = self;
+
     int direction = (team == WHITE) ? 1 : -1; // Assuming WHITE should move in the positive direction and BLACK in the negative
 
     auto offsets = INITIAL_OFFSETS;
@@ -44,10 +47,10 @@ std::vector<std::queue<std::shared_ptr<Hitbox>>> Pawn::calc_moves(const Position
             Position pos{static_cast<char>(newX), newY};
             if (offset.row != 0) {
                 std::queue<std::shared_ptr<Hitbox>> q;
-                q.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], this));
+                q.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], weak_self));
                 moves.push_back(q);
             } else {
-                moves[STRAIGHT].push(std::make_shared<Hitbox>(pos, COORDINATES[pos], this));
+                moves[STRAIGHT].push(std::make_shared<Hitbox>(pos, COORDINATES[pos], weak_self));
             }
         }
     }

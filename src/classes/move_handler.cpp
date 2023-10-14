@@ -25,7 +25,7 @@ void Move_Handler::move_piece(std::shared_ptr<Piece> piece, Position pos) {
     // place_piece(piece);
     Position position = piece->get_pos();
 
-    game_board.set_piece(position, nullptr);
+    game_board.clear_position(pos);
     piece->set_piece_pos(pos);
 
     // reset_obstructed_at(position);
@@ -42,7 +42,7 @@ void Move_Handler::reset_hitboxes(std::shared_ptr<Piece> piece) {
     p.clear_hitboxes();
 }
 
-void Move_Handler::place_piece(const std::shared_ptr<Piece> piece) {
+void Move_Handler::place_piece(const std::shared_ptr<Piece>& piece) {
     Piece& p = *piece;
     Position pos = p.get_pos();
     
@@ -63,7 +63,7 @@ void Move_Handler::place_piece(const std::shared_ptr<Piece> piece) {
     // processed_pieces.clear();
 }
 
-std::vector<std::queue<std::shared_ptr<Hitbox>>> Move_Handler::check_cache(Position pos, std::shared_ptr<Piece> piece) {
+std::vector<std::queue<std::shared_ptr<Hitbox>>> Move_Handler::check_cache(Position pos,const std::shared_ptr<Piece>& piece) {
     Piece& p = *piece;
 
     if (p.hitboxes_are_valid()) {
@@ -72,8 +72,9 @@ std::vector<std::queue<std::shared_ptr<Hitbox>>> Move_Handler::check_cache(Posit
         std::vector<std::queue<std::shared_ptr<Hitbox>>> all_moves = p.calc_moves(pos);
         p.cache_moves(all_moves);
         game_board.set_piece(pos, piece);
-        // check_if_im_obstructing(pos, piece);
-        // reset_obstructed_at(pos);
+        check_if_im_obstructing(pos);
+        std::cout << "After set_piece: " << piece.use_count() << std::endl;
+        reset_obstructed_at(pos);
         return all_moves;
     }
 }
@@ -200,28 +201,35 @@ void Move_Handler::check_for_obstructions_and_valid_moves(std::shared_ptr<Piece>
 
 
 
-// void Move_Handler::check_if_im_obstructing(const Position pos, std::shared_ptr<Piece> piece) {
-//     // std::vector<std::shared_ptr<Hitbox>> hitboxes = hitbox_manager.check_hitbox(pos);
-//     // if (hitboxes.empty()) return;
+void Move_Handler::check_if_im_obstructing(const Position pos) {
+    std::vector<std::shared_ptr<Hitbox>> hitboxes = hitbox_manager.check_hitbox(pos);
+    if (hitboxes.empty()) return;
 
-//     // for (std::shared_ptr<Hitbox> const & hitbox : hitboxes) {
-//     //     add_obstructed(pos, hitbox->get_parent());
-//     // }
-// }
+    for (std::shared_ptr<Hitbox> const & hitbox : hitboxes) {
+        obstructed_pieces_manager[pos].emplace_back(hitbox->get_parent());
+    }
+}
 
-// void Move_Handler::reset_obstructed_at(const Position pos) {    
-//     // if (obstructed_pieces_manager.find(pos) == obstructed_pieces_manager.end()) return;
+void Move_Handler::reset_obstructed_at(Position pos) {    
+    if (obstructed_pieces_manager.find(pos) == obstructed_pieces_manager.end()) return;
 
-//     // std::vector<std::shared_ptr<Piece>>& obstructed_pieces = obstructed_pieces_manager[pos];
+    std::vector<std::shared_ptr<Piece>>& obstructed_pieces = obstructed_pieces_manager[pos];
 
-//     // for (const std::shared_ptr<Piece>& obstructing_piece : obstructed_pieces) {
-//     //     if (processed_pieces.find(obstructing_piece) != processed_pieces.end()) continue;
+    for (std::shared_ptr<Piece>& obstructed_piece : obstructed_pieces) {
+        for (auto hitbox : obstructed_piece->get_hitboxes_mutable()) {
+            hitbox->hide();
+        }
+        check_for_obstructions_and_valid_moves(obstructed_piece, obstructed_piece->get_cache());
+        
+    }
+    for (const auto& obstructed_piece : obstructed_pieces) {
+    std::cout << "Reference count: " << obstructed_piece.use_count() << std::endl;
+    std::cout << obstructed_piece->get_pos().row << std::endl;
+}
 
-//     //     deferred_pieces.push(obstructing_piece);
-//     //     processed_pieces.insert(obstructing_piece);
-//     // }
-//     // obstructed_pieces_manager.erase(pos);
-// }
+
+    obstructed_pieces_manager.erase(pos);
+}
 
 // void Move_Handler::update_deferred_pieces() {
 //     // while (!deferred_pieces.empty()) {
@@ -239,10 +247,6 @@ void Move_Handler::check_for_obstructions_and_valid_moves(std::shared_ptr<Piece>
 //     //     temp_queue.pop();
 //     //     place_piece(piece_to_place);
 //     // }
-// }
-
-// void Move_Handler::add_obstructed(const Position pos, std::shared_ptr<Piece> piece) {
-//     // obstructed_pieces_manager[pos].emplace_back(piece);
 // }
 
 // bool Move_Handler::is_in_squares_between(const Position& pos, Color team) {

@@ -118,19 +118,19 @@ std::optional<std::shared_ptr<Piece>> Board::get_piece(Position key) {
     }
 }
 
-void Board::set_piece(Position key, std::shared_ptr<Piece> val) {
-    if (val == nullptr) {
-        PIECES->erase(key);
-    } else if (key == Position{}) {
-        auto position = val->get_pos();
-        (*PIECES)[position] = val;
-        val->set_position((*MAP_OF_GRID)[position]->getPosition());
-    } else {
-        (*PIECES)[key] = val;
-         val->set_position((*MAP_OF_GRID)[key]->getPosition());
-    }
+void Board::set_piece(Position key, const std::shared_ptr<Piece>& val) {
+    // if (key == Position{}) {
+    //     auto position = val->get_pos();
+    //     (*PIECES)[position] = val;
+    //     val->set_position((*MAP_OF_GRID)[position]->getPosition());
+    // } else {
+    (*PIECES)[key] = val;
+    val->set_position((*MAP_OF_GRID)[key]->getPosition());
+    // }
 }
-
+void Board::clear_position(Position key) {
+    PIECES->erase(key);
+}
 void Board::draw_piece(sf::RenderWindow &window) {
     for (auto pair : (*PIECES)) {
         if (pair.second) {
@@ -173,13 +173,13 @@ void Board::draw_hitboxes(sf::RenderWindow &window) const {
 */
 
 
-void Board::set_piece(char row, int col, std::shared_ptr<Piece> piece_to_save) {
-    set_piece({row, col}, piece_to_save);
-}
+// void Board::set_piece(char row, int col, std::shared_ptr<Piece>& piece_to_save) {
+//     set_piece({row, col}, piece_to_save);
+// }
 
-void Board::set_piece(std::shared_ptr<Piece> piece_to_save) {
-    set_piece({}, piece_to_save);
-}
+// void Board::set_piece(std::shared_ptr<Piece>& piece_to_save) {
+//     set_piece({}, piece_to_save);
+// }
 
 std::shared_ptr<sf::RectangleShape> Board::get_grid_square_from_map(Position key) {
     return get_grid_square_from_map(key.row, key.col);

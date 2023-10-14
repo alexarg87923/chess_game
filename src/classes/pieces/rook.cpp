@@ -12,11 +12,14 @@ Rook::Rook(char row, int col, Color team_color, sf::Vector2f size) : Piece(row, 
 
     std::vector<std::queue<std::shared_ptr<Hitbox>>> moves;
 
+    std::shared_ptr<Rook> self = std::dynamic_pointer_cast<Rook>(shared_from_this());
+    std::weak_ptr<Piece> weak_self = self;
+
     // LEFT
     std::queue<std::shared_ptr<Hitbox>> leftMoves;
     for (char i = row_current - 1; i >= 'A'; i--) {
         Position pos{static_cast<char>(i), col_current};
-        leftMoves.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], this));
+        leftMoves.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], weak_self));
     }
     moves.push_back(leftMoves);
 
@@ -24,7 +27,7 @@ Rook::Rook(char row, int col, Color team_color, sf::Vector2f size) : Piece(row, 
     std::queue<std::shared_ptr<Hitbox>> upMoves;
     for (int i = col_current + 1; i <= col_end; i++) {
         Position pos{row_current, i};
-        upMoves.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], this));
+        upMoves.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], weak_self));
     }
     moves.push_back(upMoves);
 
@@ -32,7 +35,7 @@ Rook::Rook(char row, int col, Color team_color, sf::Vector2f size) : Piece(row, 
     std::queue<std::shared_ptr<Hitbox>> rightMoves;
     for (char i = row_current + 1; i <= row_end; i++) {
         Position pos{i, col_current};
-        rightMoves.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], this));
+        rightMoves.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], weak_self));
     }
     moves.push_back(rightMoves);
 
@@ -40,7 +43,7 @@ Rook::Rook(char row, int col, Color team_color, sf::Vector2f size) : Piece(row, 
     std::queue<std::shared_ptr<Hitbox>> downMoves;
     for (int i = col_current - 1; i >= 1; i--) {
         Position pos{row_current, i};
-        downMoves.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], this));
+        downMoves.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], weak_self));
     }
     moves.push_back(downMoves);
 

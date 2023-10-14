@@ -41,9 +41,10 @@ public:
     std::optional<std::shared_ptr<Piece>> get_piece(char row, int col);
     std::optional<std::shared_ptr<Piece>> get_piece(Position key);
     
-    void set_piece(Position key = {}, std::shared_ptr<Piece> piece_to_save = nullptr);
-    void set_piece(char row = '\0', int col = 0, std::shared_ptr<Piece> piece_to_save = nullptr);
-    void set_piece(std::shared_ptr<Piece> piece_to_save);
+    void set_piece(Position key, const std::shared_ptr<Piece>& piece_to_save);
+    void clear_position(Position key);
+    // void set_piece(char row = '\0', int col = 0, std::shared_ptr<Piece>& piece_to_save );
+    // void set_piece(std::shared_ptr<Piece>& piece_to_save);
 
     std::optional<Position> check_clicked_hitbox(sf::Vector2i mouse_pos);
     std::optional<std::shared_ptr<Piece>> check_clicked_piece(sf::Vector2i mouse_pos);

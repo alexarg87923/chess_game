@@ -28,7 +28,7 @@ enum MovementType {
 #include "hitbox.hpp"
 // class Hitbox;
 
-class Piece {
+class Piece : public std::enable_shared_from_this<Piece>  {
 public:
     Piece();
     virtual ~Piece() = default;

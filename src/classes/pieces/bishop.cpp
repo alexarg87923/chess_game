@@ -10,12 +10,15 @@ std::vector<std::queue<std::shared_ptr<Hitbox>>> Bishop::calc_moves(const Positi
     char row_start = pos.row, row_end = 7 + 'A';
     int col_start = pos.col, col_end = BOARD_COL;
 
+    std::shared_ptr<Bishop> self = std::dynamic_pointer_cast<Bishop>(shared_from_this());
+    std::weak_ptr<Piece> weak_self = self;
+
     std::vector<std::queue<std::shared_ptr<Hitbox>>> moves;
     // Diagonal up-right
     std::queue<std::shared_ptr<Hitbox>> up_right;
     for (char i = row_start - 1, j = col_start + 1; i >= 'A' && j <= col_end; i--, j++) {
         Position pos{i, j};
-        up_right.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], this));
+        up_right.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], weak_self));
     }
     moves.push_back(up_right);
 
@@ -23,7 +26,7 @@ std::vector<std::queue<std::shared_ptr<Hitbox>>> Bishop::calc_moves(const Positi
     std::queue<std::shared_ptr<Hitbox>> down_right;
     for (char i = row_start + 1, j = col_start + 1; i <= row_end && j <= col_end; i++, j++) {
         Position pos{i, j};
-        down_right.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], this));
+        down_right.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], weak_self));
     }
     moves.push_back(down_right);
 
@@ -31,7 +34,7 @@ std::vector<std::queue<std::shared_ptr<Hitbox>>> Bishop::calc_moves(const Positi
     std::queue<std::shared_ptr<Hitbox>> down_left;
     for (char i = row_start + 1, j = col_start - 1; i <= row_end && j >= 1; i++, j--) {
         Position pos{i, j};
-        down_left.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], this));
+        down_left.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], weak_self));
     }
     moves.push_back(down_left);
 
@@ -39,7 +42,7 @@ std::vector<std::queue<std::shared_ptr<Hitbox>>> Bishop::calc_moves(const Positi
     std::queue<std::shared_ptr<Hitbox>> up_left;
     for (char i = row_start - 1, j = col_start - 1; i >= 'A' && j >= 1; i--, j--) {
         Position pos{i, j};
-        up_left.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], this));
+        up_left.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], weak_self));
     }
     moves.push_back(up_left);
 
