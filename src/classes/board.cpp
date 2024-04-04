@@ -124,6 +124,11 @@ void Board::set_piece(Position key, const std::shared_ptr<Piece>& val) {
     //     (*PIECES)[position] = val;
     //     val->set_position((*MAP_OF_GRID)[position]->getPosition());
     // } else {
+
+    // Position pos = val->get_pos();
+    // if (pos != Position{}) {
+    //     (*PIECES)[pos] = nullptr;  
+    // }
     (*PIECES)[key] = val;
     val->set_position((*MAP_OF_GRID)[key]->getPosition());
     // }

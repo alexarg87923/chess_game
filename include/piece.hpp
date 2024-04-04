@@ -26,6 +26,7 @@ enum MovementType {
 #include "constants.hpp"
 #include "helper.hpp"
 #include "hitbox.hpp"
+#include <glog/logging.h>
 // class Hitbox;
 
 class Piece : public std::enable_shared_from_this<Piece>  {
@@ -64,6 +65,8 @@ public:
     void process();
     bool is_being_processed();
     bool is_king() const;
+	std::string get_name();
+
 protected:
     std::unique_ptr<sf::RectangleShape> piece_rect_obj;
     Color team;

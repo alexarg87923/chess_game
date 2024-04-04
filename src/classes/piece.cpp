@@ -123,6 +123,29 @@ std::vector<std::shared_ptr<Hitbox>>& Piece::get_hitboxes_mutable() {
     return hitboxes;
 }
 
+std::string Piece::get_name() {
+	switch(piece_type) {
+		    case PIECE::Pawn:
+				return "Pawn";
+			break;
+			case PIECE::King:
+				return "King";
+			break;
+			case PIECE::Knight:
+				return "Knight";
+			break;
+			case PIECE::Rook:
+				return "Rook";
+			break;
+			case PIECE::Queen:
+				return "Queen";
+			break;
+			case PIECE::Bishop:
+				return "Bishop";
+			break;
+	}
+}
+
 
 /*
     OVERLOADED FUNCTIONS

@@ -12,7 +12,7 @@ std::vector<std::queue<std::shared_ptr<Hitbox>>> King::calc_moves(const Position
     const int ZERO_OFFSET = 0;
 
     std::shared_ptr<King> self = std::static_pointer_cast<King>(shared_from_this());
-    std::weak_ptr<Piece> weak_self = self;
+    // std::weak_ptr<Piece> weak_self = self;
 
     std::vector<std::queue<std::shared_ptr<Hitbox>>> moves;
     moves.emplace_back();
@@ -26,7 +26,7 @@ std::vector<std::queue<std::shared_ptr<Hitbox>>> King::calc_moves(const Position
             Position new_pos{static_cast<char>(pos_copy.row + i), pos_copy.col + j};
             if (!(i == ZERO_OFFSET && j == ZERO_OFFSET)) {
                 if (validate_in_bounds(new_pos)) {
-                    q.push(std::make_shared<Hitbox>(new_pos, COORDINATES[new_pos], weak_self));
+                    q.push(std::make_shared<Hitbox>(new_pos, COORDINATES[new_pos], self));
                 }
             }
         }

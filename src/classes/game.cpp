@@ -9,13 +9,13 @@ Game::Game() :
 {}
 
 void Game::start() {
-    std::cout << "Starting game...\n";
-
+    LOG(INFO) << "Adding grid pieces to the screen...";
     game_board.add_grid();
 
+    LOG(INFO) << "Initializing pieces...";
     initialize_pieces();
 
-    // GAME LOOP
+    LOG(INFO) << "Starting game loop...";
     while (window.isOpen()) {
         // handle slowing down of frameRate
         handle_frame_rate(FRAME_RATE, clock);
@@ -31,15 +31,20 @@ void Game::start() {
 void Game::initialize_pieces() {
     auto size_of_grid_square = SIZE;
 
+    LOG(INFO) << "Placing White King...";
     auto white_king = std::make_shared<King>('E', 1, WHITE, size_of_grid_square);
     move_handler.place_piece(white_king);
     game_board.set_king(white_king);
 
+    LOG(INFO) << "Placing Black King...";
     auto black_king = std::make_shared<King>('D', 8, BLACK, size_of_grid_square);
     move_handler.place_piece(black_king);
     game_board.set_king(black_king);
 
+    LOG(INFO) << "Placing Bishop...";
     move_handler.place_piece(std::make_shared<Bishop>('A', 1, WHITE, size_of_grid_square));
+
+    LOG(INFO) << "Placing Queen...";
     move_handler.place_piece(std::make_shared<Queen>('E', 5, BLACK, size_of_grid_square));
     
 
@@ -58,18 +63,22 @@ void Game::initialize_pieces() {
 
 void Game::initialize_game() {
     auto size_of_grid_square = SIZE;
-
+    LOG(INFO) << "Placing White King...";
     // Kings
     auto white_king = std::make_shared<King>('E', 1, WHITE, size_of_grid_square);
     move_handler.place_piece(white_king);
     game_board.set_king(white_king);
 
+    LOG(INFO) << "Placing Black King...";
     auto black_king = std::make_shared<King>('E', 8, BLACK, size_of_grid_square);
     move_handler.place_piece(black_king);
     game_board.set_king(black_king);
 
+    LOG(INFO) << "Placing White Queen...";
     // Queens
     move_handler.place_piece(std::make_shared<Queen>('D', 1, WHITE, size_of_grid_square));
+
+    LOG(INFO) << "Placing Black Queen...";
     move_handler.place_piece(std::make_shared<Queen>('D', 8, BLACK, size_of_grid_square));
 
     // Bishops
@@ -134,10 +143,13 @@ void Game::listen_left_click(const sf::Event& event) {
     if (selected_piece) {
         std::__1::optional<Position> clicked_hitbox = game_board.check_clicked_hitbox(sf::Mouse::getPosition(window));
         if (clicked_hitbox.has_value()) {
+            LOG(INFO) << "Sending piece to be moved...";
             move_handler.move_piece(selected_piece, clicked_hitbox.value());
 
+            LOG(INFO) << "Clearing Hitboxes from the board...";
             game_board.clear_hitboxes();
 
+            LOG(INFO) << "Clearing Selected Piece...";
             game_board.select_piece(nullptr);
             return;
         }
@@ -145,11 +157,13 @@ void Game::listen_left_click(const sf::Event& event) {
 
     std::optional<std::__1::shared_ptr<Piece>> clicked_piece = game_board.check_clicked_piece(sf::Mouse::getPosition(window));
     if (clicked_piece.has_value() && clicked_piece.value() != selected_piece) {
+        LOG(INFO) << "Selecting Piece...";
         game_board.select_piece(clicked_piece.value());
+        LOG(INFO) << "Fetching Hitboxes...";
         game_board.get_hitboxes_from_piece();
         return;
     }
-
+    LOG(INFO) << "De-selecting Piece...";
     game_board.select_piece(nullptr);
 }
 

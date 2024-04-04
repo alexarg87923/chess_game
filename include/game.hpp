@@ -14,6 +14,7 @@
 #include "pieces/king.hpp"
 #include "pieces/knight.hpp"
 #include "pieces/rook.hpp"
+#include <glog/logging.h>
 
 class Piece;
 

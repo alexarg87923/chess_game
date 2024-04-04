@@ -2,7 +2,7 @@
 
 #include "piece.hpp"
 
-Hitbox::Hitbox(const Position& incoming_pos, sf::Vector2f incoming_position, std::weak_ptr<Piece> incoming_parent){
+Hitbox::Hitbox(const Position& incoming_pos, sf::Vector2f incoming_position, std::shared_ptr<Piece> incoming_parent){
     parent = incoming_parent;
     position = incoming_pos;
 
@@ -20,11 +20,15 @@ void Hitbox::show() {
     hitbox->setSize(SIZE);
 }
 
+void Hitbox::unhighlight() {
+    hitbox->setFillColor(sf::Color(0, 0, 255));
+}
+
 void Hitbox::highlight() {
     hitbox->setFillColor(sf::Color(0, 0, 255, 128));
 }
 
-std::weak_ptr<Piece> Hitbox::get_parent() const {
+std::shared_ptr<Piece> Hitbox::get_parent() const {
     return parent;
 }
 
@@ -37,7 +41,8 @@ Position Hitbox::get_position() const {
 }
 
 bool Hitbox::operator==(const std::shared_ptr<Hitbox>& other) const {
-    return position == other->position && parent.lock() == other->parent.lock();
+    // Assuming position is a member of Hitbox
+    return position == other->position && parent == other->parent;
 }
 
 

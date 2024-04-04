@@ -54,7 +54,7 @@ void Hitbox_Manager::add_moves_to_state(std::shared_ptr<Piece> piece, std::vecto
 /*
     OVERLOADED FUNCTIONS
 */
-
+ 
 std::vector<std::shared_ptr<Hitbox>> Hitbox_Manager::check_hitbox(Color team, const Position& key) const {
     return check_hitbox(team, key.row, key.col);
 }
