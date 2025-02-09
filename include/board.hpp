@@ -1,9 +1,13 @@
-#pragma once
+#ifndef BOARD_H
+#define BOARD_H
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 
 #include <map>
+
+#include "constants.hpp"
+#include "types.hpp"
 
 #include "hitbox.hpp"
 
@@ -17,12 +21,15 @@ public:
     void draw_board(sf::RenderWindow& window);
 
     // Hitboxes
-    void get_hitboxes_from_piece();
+    void make_hitboxes();
     void clear_hitboxes();
 
     void draw_hitboxes(sf::RenderWindow &window) const;
 
     // Grid squares
+    sf::Vector2f get_size_of_grid_square();
+    void set_size_of_grid_square(sf::Vector2f size);
+
     std::shared_ptr<sf::RectangleShape> get_grid_square_from_map(Position key);
     std::shared_ptr<sf::RectangleShape> get_grid_square_from_map(char row, int col);
     void set_map_of_grid_square(Position key, std::shared_ptr<sf::RectangleShape> val);
@@ -68,3 +75,4 @@ private:
     sf::Vector2f GRID_SQUARE_SIZE;
 };
 
+#endif

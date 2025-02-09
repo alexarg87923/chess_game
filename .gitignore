@@ -1,8 +1,1 @@
-
-src/.DS_Store
-.DS_Store
-bin/chess.dSYM/Contents/Resources/DWARF/chess
-bin/chess
-dump.rdb
-.vscode
 bin/

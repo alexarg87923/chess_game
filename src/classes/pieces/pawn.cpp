@@ -1,16 +1,18 @@
 #include "pieces/pawn.hpp"
+
+enum MovementType {
+    STRAIGHT = -100,
+    DIAGONAL = -99
+};
+
 struct Offset {
     int row;
     int col;
 };
 
-// enum MovementType {
-//     STRAIGHT,
-//     DIAGONAL
-// };
-
-std::vector<Offset> INITIAL_OFFSETS = {
-    {0, 1},   // Placholder for straight move
+const std::vector<Offset> INITIAL_OFFSETS = {
+    {0, 0},   // Placholder for straight move
+    {0, 0},    // Placeholder for straight move 2 squares
     {1, 1},   // Diagonal right move for WHITE
     {-1, 1},  // Diagonal left move for WHITE
 };
@@ -19,35 +21,32 @@ Pawn::Pawn(){}
 Pawn::~Pawn(){}
 
 Pawn::Pawn(const Position& pos, Color team_color, sf::Vector2f size) : Pawn(pos.row, pos.col, team_color, size) {}
-Pawn::Pawn(char row, int col, Color team_color, sf::Vector2f size) : Piece(row, col, team_color, PIECE::Pawn, size, "pawn") {}
+Pawn::Pawn(char row, int col, Color team_color, sf::Vector2f size) : Piece(row, col, team_color, "pawn", size) {}
 
-std::vector<std::queue<std::shared_ptr<Hitbox>>> Pawn::calc_moves(const Position& pos) {
-    std::vector<std::queue<std::shared_ptr<Hitbox>>> moves;
-    moves.push_back(std::queue<std::shared_ptr<Hitbox>>());
-
-    int direction = (team == WHITE) ? 1 : -1; // Assuming WHITE should move in the positive direction and BLACK in the negative
-
+std::map<MoveAttributes, std::vector<std::queue<Position>>> Pawn::calc_moves(const Position& pos) const {
+    std::map<MoveAttributes, std::vector<std::queue<Position>>> moves;
+    int direction = (team == WHITE) ? WHITE : BLACK;
+    
     auto offsets = INITIAL_OFFSETS;
-
     for (auto& offset : offsets) {
         offset.col *= direction;
     }
 
     if (first_move) {
-        offsets.push_back({0, 2 * direction});
+        offsets[0] = {0, direction};
+        offsets[1] = {0, 2 * direction};
     }
 
-    for (auto& offset : offsets) {
+    for (const auto& offset : offsets) {
         int newX = pos.row + offset.row;
         int newY = pos.col + offset.col;
+
         if (validate_in_bounds(newX, newY)) {
-            Position pos{static_cast<char>(newX), newY};
             if (offset.row != 0) {
-                std::queue<std::shared_ptr<Hitbox>> q;
-                q.push(std::make_shared<Hitbox>(pos, COORDINATES[pos], this));
-                moves.push_back(q);
+                moves[DIAGONAL].push(Position{static_cast<char>(newX), newY});
+
             } else {
-                moves[STRAIGHT].push(std::make_shared<Hitbox>(pos, COORDINATES[pos], this));
+                moves[STRAIGHT].push(Position{static_cast<char>(newX), newY});
             }
         }
     }

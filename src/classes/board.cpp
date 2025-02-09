@@ -24,7 +24,7 @@ void Board::add_grid() {
     
     size = sf::Vector2f(size.x/BOARD_COL, size.y/BOARD_ROW);
 
-    SIZE = size;
+    set_size_of_grid_square(size);
 
     // Alot happens in this for loop so then I don't have to go through this loop multiple times
     for (int row = 0; row < BOARD_ROW; row++) {
@@ -39,9 +39,6 @@ void Board::add_grid() {
             // The SFML coordinate system is turned into the standard chess coordinate system
             char character_offset = ('A' + row);
             Position key = {character_offset, (BOARD_COL - col)};
-
-            // Saving as a constant variable
-            COORDINATES[key] = new_position;
 
             set_map_of_grid_square(key, grid_piece);
         }
@@ -85,6 +82,14 @@ std::shared_ptr<Piece> Board::get_selected_piece() {
 
 void Board::draw_board(sf::RenderWindow& window) {
     window.draw(*board);
+}
+
+void Board::set_size_of_grid_square(sf::Vector2f tmp) {
+    GRID_SQUARE_SIZE = tmp;
+}
+
+sf::Vector2f Board::get_size_of_grid_square() {
+    return GRID_SQUARE_SIZE;
 }
 
 std::shared_ptr<sf::RectangleShape> Board::get_grid_square_from_map(char row, int col) {
@@ -152,7 +157,12 @@ void Board::clear_hitboxes() {
     HITBOXES.clear();
 }
 
-void Board::get_hitboxes_from_piece() {
+void Board::make_hitboxes() {
+    if (!selected_piece) {
+        HITBOXES.clear();
+        return;
+    }
+
     HITBOXES = selected_piece->get_hitboxes();
 }
 

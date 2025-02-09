@@ -1,4 +1,8 @@
-#pragma once
+#ifndef PAWN_H
+#define PAWN_H
+
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 
 #include "piece.hpp"
 
@@ -10,9 +14,10 @@ public:
     Pawn(char row, int col, Color team_color, sf::Vector2f size);
     Pawn(const Position& pos, Color team_color, sf::Vector2f size);
 
-    std::vector<std::queue<std::shared_ptr<Hitbox>>> calc_moves(const Position& pos) override;
+    std::map<MoveAttributes, std::vector<std::queue<Position>>> calc_moves(const Position& pos) const override;
 
 private:
     bool first_move = true;
 };
 
+#endif

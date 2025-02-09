@@ -11,14 +11,22 @@ Hitbox_Manager::~Hitbox_Manager(){}
 std::vector<std::shared_ptr<Hitbox>> Hitbox_Manager::check_hitbox(Color team, char row, int col) const {
     auto team_board = HITBOX_STATES.find(team);
 
-    if (team_board == HITBOX_STATES.end()) return {};
+    if (team_board == HITBOX_STATES.end()) {
+        return {};
+    }
 
     auto &board = team_board->second;
     auto hitbox = board.find({row, col});
 
-    if (hitbox != board.end()) return hitbox->second;
+    if (hitbox != board.end()) {
+        return hitbox->second;
+    }
 
     return {};
+}
+
+void Hitbox_Manager::update_hitbox_state(Color team, char row, int col, std::shared_ptr<Hitbox> value) {
+    HITBOX_STATES[team][{row, col}].push_back(value);
 }
 
 void Hitbox_Manager::remove_hitboxes_from_state(std::shared_ptr<Piece> piece_hitbox_to_update) {
@@ -37,18 +45,33 @@ void Hitbox_Manager::remove_hitboxes_from_state(std::shared_ptr<Piece> piece_hit
     }
 }
 
-void Hitbox_Manager::add_moves_to_state(std::shared_ptr<Piece> piece, std::vector<std::queue<std::shared_ptr<Hitbox>>> moves) {
-    Color team = piece->get_team();
+void Hitbox_Manager::add_moves_to_state(std::shared_ptr<Piece> piece, std::vector<Position> moves) {
+    for (auto &each : moves) {
+        auto tmp = std::make_shared<Hitbox>(game_board.get_size_of_grid_square(), each, game_board.get_grid_square_from_map(each)->getPosition(), (game_board.get_piece(each) ? sf::Color(0, 0, 255, 128) : sf::Color(0, 0, 255)), piece);
+        piece->add_hitbox(tmp);
+        update_hitbox_state(piece->get_team(), each, tmp);
+    }
+}
 
-    for (auto& queue : moves) {
-        if (queue.empty()) continue;
-        while(!queue.empty()) {
-            std::shared_ptr<Hitbox> curr_hitbox = queue.front();
-            queue.pop();
-            HITBOX_STATES[team][curr_hitbox->get_position()].push_back(curr_hitbox);
-            piece->add_hitbox(curr_hitbox);
+std::vector<std::shared_ptr<Hitbox>> Hitbox_Manager::check_hitbox(const Position& pos) const {
+    std::vector<std::shared_ptr<Hitbox>> mergedResults;
+
+    if (HITBOX_STATES.empty()) {
+        return mergedResults;
+    }
+
+    for (auto &each_board : HITBOX_STATES) {
+        if (each_board.second.empty()) {
+            continue;
+        }
+
+        auto iter = each_board.second.find(pos);
+        if (iter != each_board.second.end() && !iter->second.empty()) {
+            mergedResults.insert(mergedResults.end(), iter->second.begin(), iter->second.end());
         }
     }
+
+    return mergedResults;
 }
 
 /*
@@ -59,17 +82,6 @@ std::vector<std::shared_ptr<Hitbox>> Hitbox_Manager::check_hitbox(Color team, co
     return check_hitbox(team, key.row, key.col);
 }
 
-std::vector<std::shared_ptr<Hitbox>> Hitbox_Manager::check_hitbox(const Position& pos) const {
-    std::vector<std::shared_ptr<Hitbox>> mergedResults;
-    
-    if (HITBOX_STATES.empty()) return mergedResults;
-
-    for (auto &each_board : HITBOX_STATES) {
-        if (each_board.second.empty()) continue;
-
-        auto iter = each_board.second.find(pos);
-        if (iter != each_board.second.end() && !iter->second.empty()) mergedResults.insert(mergedResults.end(), iter->second.begin(), iter->second.end());
-    }
-
-    return mergedResults;
+void Hitbox_Manager::update_hitbox_state(Color team, const Position& pos, std::shared_ptr<Hitbox> value) {
+    HITBOX_STATES[team][pos].push_back(value);
 }

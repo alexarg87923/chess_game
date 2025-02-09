@@ -1,38 +1,29 @@
 #include "move_handler.hpp"
 
+#include "piece.hpp"
+
+// enum PAWN_MOVE_TYPE {
+//     PAWN_STRAIGHT = -100,
+//     PAWN_DIAGONAL
+// };
+
 Move_Handler::Move_Handler(Board& incoming_game_board) :
     game_board(incoming_game_board), hitbox_manager(game_board)
 {}
 
 void Move_Handler::move_piece(std::shared_ptr<Piece> piece, Position pos) {
-    // auto position = piece->get_pos();
+    auto position = piece->get_pos(); // get old pos
 
-    // game_board.set_piece(position, nullptr);
+    game_board.set_piece(position, nullptr); // clear the old position of the piece
 
-    // game_board.set_piece(pos, piece);
+    reset_obstructed_at(position); // if pieces were being obstructed, now that i removed the piece from the board, i can recalculate
+                                    // and see if the piece is still obstructed
 
-    // reset_obstructed_at(position);
-    // simulate_update();
+    piece->set_piece_pos(pos); // set the configuratoin of the piece
 
-    // if (hitbox_in_pos_of_king(piece->get_team())) {
-    //     game_board.set_piece(position, piece);
-    // } else {
-    //     piece->set_piece_pos(pos);
-    // }
+    piece->invalidate_moves(); // since piece now has a new position then old moves are invalid
 
-    // piece->invalidate_moves();
-
-    // place_piece(piece);
-    Position position = piece->get_pos();
-
-    game_board.set_piece(position, nullptr);
-    piece->set_piece_pos(pos);
-
-    // reset_obstructed_at(position);
-
-    piece->invalidate_moves();
-
-    place_piece(piece);
+    place_piece(piece); // place the piece on the state manager
 }
 
 void Move_Handler::reset_hitboxes(std::shared_ptr<Piece> piece) {
@@ -44,214 +35,109 @@ void Move_Handler::reset_hitboxes(std::shared_ptr<Piece> piece) {
 
 void Move_Handler::place_piece(const std::shared_ptr<Piece> piece) {
     Piece& p = *piece;
-    Position pos = p.get_pos();
+    auto pos = p.get_pos(); // position to set it to
     
-    reset_hitboxes(piece);
+    reset_hitboxes(piece); // reset the hitboxes if there are any
 
-    std::vector<std::queue<std::shared_ptr<Hitbox>>> all_hitboxes = check_cache(pos, piece);
-
-    // add all moves to the hitbox manager
-    hitbox_manager.add_moves_to_state(piece, all_hitboxes);
+    // check for cached moves
+    std::map<MoveAttributes, std::vector<std::queue<Position>>> moves = check_cache(pos, piece);
 
     // look for valid moves
-    check_for_obstructions_and_valid_moves(piece, all_hitboxes);
+    std::vector<Position> valid_moves = check_for_obstructions_and_valid_moves(piece, moves);
+
+    // add the valid moves to the hitbox manager
+    hitbox_manager.add_moves_to_state(piece, valid_moves);
 
     // update the pieces that need updating now
-    // update_deferred_pieces();
+    update_deferred_pieces();
 
     // clear the queue
-    // processed_pieces.clear();
+    processed_pieces.clear();
 }
 
-std::vector<std::queue<std::shared_ptr<Hitbox>>> Move_Handler::check_cache(Position pos, std::shared_ptr<Piece> piece) {
+void Move_Handler::update_deferred_pieces() {
+    while (!deferred_pieces.empty()) {
+        auto piece_to_place = deferred_pieces.front();
+        deferred_pieces.pop();
+        place_piece(piece_to_place);
+    }
+}
+
+std::vector<Position> Move_Handler::check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::map<MoveAttributes, std::vector<std::queue<Position>>> moves) {
+    std::vector<Position> valid_moves;
+
+    for (auto & moves_pair : moves) {
+        while (!moves_pair.second.empty()) {
+            for (auto const & queue : moves_pair.second) {
+
+            const Position& nextPos = queue.front();
+            auto pieceOpt = game_board.get_piece(nextPos);
+
+            // if (moves_pair.first == PAWN_STRAIGHT && pieceOpt.has_value()) {
+            //     add_obstructed(nextPos, inc_piece);
+            //     break;
+            // } else if (moves_pair.first == PAWN_DIAGONAL && pieceOpt.has_value()) {
+            //     valid_moves.push_back(nextPos);
+            //     break;
+            // }
+
+            if (pieceOpt.has_value()) {
+                auto piece = pieceOpt.value();
+                if (piece->get_team() != inc_piece->get_team()) {
+                    valid_moves.push_back(nextPos);
+                }
+                add_obstructed(nextPos, inc_piece);
+                break; // stop checking further in this direction as there's an obstruction
+            } else {
+                valid_moves.push_back(nextPos);
+            }
+            moves_pair.second.pop(); // move to the next position in this direction
+            }
+        }
+    }
+
+    return valid_moves;
+}
+
+std::map<MoveAttributes, std::vector<std::queue<Position>>> Move_Handler::check_cache(Position pos, std::shared_ptr<Piece> piece) {
     Piece& p = *piece;
 
     if (p.moves_are_valid()) {
         return p.get_moves();
     } else {
-        std::vector<std::queue<std::shared_ptr<Hitbox>>> all_moves = p.calc_moves(pos);
-        p.cache_moves(all_moves);
+        std::map<MoveAttributes, std::vector<std::queue<Position>>> moves = p.calc_moves(pos);
+        p.cache_moves(moves);
         game_board.set_piece(pos, piece);
-        // check_if_im_obstructing(pos, piece);
-        // reset_obstructed_at(pos);
-        return all_moves;
+        check_if_im_obstructing(pos, piece);
+        reset_obstructed_at(pos);
+        return moves;
     }
 }
 
-void Move_Handler::check_for_obstructions_and_valid_moves(std::shared_ptr<Piece> inc_piece, std::vector<std::queue<std::shared_ptr<Hitbox>>> moves) {
-    PIECE piece = inc_piece->get_piece_type();
-    auto pawn_logic = [inc_piece, this](std::vector<std::queue<std::shared_ptr<Hitbox>>>& moves) {
-        auto processMoves = [inc_piece, this](std::queue<std::shared_ptr<Hitbox>>& queue, bool isDiagonal) {
-            Color team = inc_piece->get_team();
-            bool continueChecking = true;
-
-            while (!queue.empty() && continueChecking) {
-                std::shared_ptr<Hitbox> curr_hitbox = queue.front();
-                queue.pop();
-
-                std::optional<std::shared_ptr<Piece>> piece_opt = game_board.get_piece(curr_hitbox->get_position());
-                if (isDiagonal) {
-                    if (piece_opt.has_value()) {
-                        curr_hitbox->show();
-                        curr_hitbox->highlight();
-                    }
-                } else {
-                    if (!piece_opt.has_value()) {
-                        curr_hitbox->show();
-                        continueChecking = false;
-                    }
-                }
-            }
-        };
-
-        std::queue<std::shared_ptr<Hitbox>>& diagonal = moves[MovementType::DIAGONAL];
-        std::queue<std::shared_ptr<Hitbox>>& straight = moves[MovementType::STRAIGHT];
-
-        processMoves(diagonal, true);
-        processMoves(straight, false);
-    };
-    
-    auto bishop_queen_rook_logic = [inc_piece, this](std::vector<std::queue<std::shared_ptr<Hitbox>>>& moves) {
-        Color team = inc_piece->get_team();
-
-        for (auto& queue : moves) {
-            while(!queue.empty()) {
-                std::shared_ptr<Hitbox> curr_hitbox = queue.front();
-                queue.pop();
-                std::optional<std::__1::shared_ptr<Piece>> piece_opt = game_board.get_piece(curr_hitbox->get_position());
-                if (piece_opt.has_value()) {
-                    if (piece_opt.value()->get_team() != team) {
-                        curr_hitbox->show();
-                        curr_hitbox->highlight();
-                    } else {
-                        curr_hitbox->hide();
-                    }
-                    break;
-                } 
-
-                curr_hitbox->show();
+void Move_Handler::reset_obstructed_at(const Position pos) {    
+    if (obstructed_pieces_manager.find(pos) != obstructed_pieces_manager.end()) {
+        auto& obstructed_pieces = obstructed_pieces_manager[pos];
+        for (const auto& obstructing_piece : obstructed_pieces) {
+            if (processed_pieces.find(obstructing_piece) == processed_pieces.end()) {
+                deferred_pieces.push(obstructing_piece);
+                processed_pieces.insert(obstructing_piece);
             }
         }
-    };
-
-    auto knight_logic = [this, inc_piece](std::vector<std::queue<std::shared_ptr<Hitbox>>>& moves) {
-        Color team = inc_piece->get_team();
-
-        for (auto& queue : moves) {
-            while(!queue.empty()) {
-                std::shared_ptr<Hitbox> curr_hitbox = queue.front();
-                queue.pop();
-                std::optional<std::__1::shared_ptr<Piece>> piece_opt = game_board.get_piece(curr_hitbox->get_position());
-                if (piece_opt.has_value()) {
-                    if (piece_opt.value()->get_team() != team) {
-                        curr_hitbox->show();
-                        curr_hitbox->highlight();
-                    } else {
-                        curr_hitbox->hide();
-                    }
-                }
-                curr_hitbox->show();
-            }
-        }
-    };
-
-    auto king_logic = [this, inc_piece](std::vector<std::queue<std::shared_ptr<Hitbox>>>& moves) {
-        Color team = inc_piece->get_team();
-
-        for (auto& queue : moves) {
-            if (queue.empty()) continue;
- 
-            while(!queue.empty()) {
-                std::shared_ptr<Hitbox> curr_hitbox = queue.front();
-                queue.pop();
-
-                if (hitbox_manager.check_hitbox((team == Color::BLACK) ? Color::WHITE : Color::BLACK, curr_hitbox->get_position()).empty()) {
-                    std::optional<std::__1::shared_ptr<Piece>> piece_opt = game_board.get_piece(curr_hitbox->get_position());
-                    if (piece_opt.has_value()) {
-                        if (piece_opt.value()->get_team() != team) {
-                            curr_hitbox->show();
-                            curr_hitbox->highlight();
-                        } else {
-                            curr_hitbox->hide();
-                        }
-                    } else {
-                        curr_hitbox->show();
-                    }
-                }
-
-            }
-        }
-    };
-
-    std::function<void(std::vector<std::queue<std::shared_ptr<Hitbox>>>&)> piece_logic;
-
-    switch (piece) {
-        case PIECE::Pawn: piece_logic = pawn_logic; break;
-        case PIECE::Bishop:
-        case PIECE::Queen:
-        case PIECE::Rook: piece_logic = bishop_queen_rook_logic; break;
-        case PIECE::Knight: piece_logic = knight_logic; break;
-        case PIECE::King: piece_logic = king_logic; break;
-        default: return;  // Early return for unexpected cases.
+        obstructed_pieces_manager.erase(pos);
     }
-
-    piece_logic(moves);
 }
 
 
+void Move_Handler::check_if_im_obstructing(const Position pos, std::shared_ptr<Piece> piece) {
+    auto hitboxes = hitbox_manager.check_hitbox(pos);
 
-// void Move_Handler::check_if_im_obstructing(const Position pos, std::shared_ptr<Piece> piece) {
-//     // std::vector<std::shared_ptr<Hitbox>> hitboxes = hitbox_manager.check_hitbox(pos);
-//     // if (hitboxes.empty()) return;
+    if (!hitboxes.empty()) {
+        for (auto const & hitbox : hitboxes) {
+            add_obstructed(pos, hitbox->get_parent());
+        }
+    }
+}
 
-//     // for (std::shared_ptr<Hitbox> const & hitbox : hitboxes) {
-//     //     add_obstructed(pos, hitbox->get_parent());
-//     // }
-// }
-
-// void Move_Handler::reset_obstructed_at(const Position pos) {    
-//     // if (obstructed_pieces_manager.find(pos) == obstructed_pieces_manager.end()) return;
-
-//     // std::vector<std::shared_ptr<Piece>>& obstructed_pieces = obstructed_pieces_manager[pos];
-
-//     // for (const std::shared_ptr<Piece>& obstructing_piece : obstructed_pieces) {
-//     //     if (processed_pieces.find(obstructing_piece) != processed_pieces.end()) continue;
-
-//     //     deferred_pieces.push(obstructing_piece);
-//     //     processed_pieces.insert(obstructing_piece);
-//     // }
-//     // obstructed_pieces_manager.erase(pos);
-// }
-
-// void Move_Handler::update_deferred_pieces() {
-//     // while (!deferred_pieces.empty()) {
-//     //     std::shared_ptr<Piece> piece_to_place = deferred_pieces.front();
-//     //     deferred_pieces.pop();
-//     //     place_piece(piece_to_place);
-//     // }
-// }
-
-// void Move_Handler::simulate_update() {
-//     // std::queue<std::shared_ptr<Piece>> temp_queue = deferred_pieces;
-
-//     // while (!temp_queue.empty()) {
-//     //     std::shared_ptr<Piece>  piece_to_place = temp_queue.front();
-//     //     temp_queue.pop();
-//     //     place_piece(piece_to_place);
-//     // }
-// }
-
-// void Move_Handler::add_obstructed(const Position pos, std::shared_ptr<Piece> piece) {
-//     // obstructed_pieces_manager[pos].emplace_back(piece);
-// }
-
-// bool Move_Handler::is_in_squares_between(const Position& pos, Color team) {
-//     // for (const std::queue<Position>& queue : squares_between[team]) {
-//     //     std::queue<Position> temp = queue;  // Create a copy to iterate through
-//     //     while (!temp.empty()) {
-//     //         if (temp.front() == pos) return true;
-//     //         temp.pop();
-//     //     }
-//     // }
-//     return true;
-// }
+void Move_Handler::add_obstructed(const Position pos, std::shared_ptr<Piece> piece) {
+    obstructed_pieces_manager[pos].emplace_back(piece);
+}
